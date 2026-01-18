@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+openai-whisper
+yt-dlp
+python-dotenv
+google-genai
+sqlalchemy
+pyjwt
+resend
