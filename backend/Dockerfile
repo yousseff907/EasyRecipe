@@ -1,4 +1,3 @@
-# Use Python 3.12 as base image
 FROM python:3.12-slim
 
 WORKDIR /app

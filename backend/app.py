@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from services.video_audio_downloader import *
@@ -11,6 +11,8 @@ from datetime import datetime
 from services.ai_processor import analyze_with_ai
 from services.email_service import send_email
 from services.auth_service import create_authentificator
+from utils import jwt_helper
+from utils.auth import get_current_user
 
 def	delete_file(path: str):
 	try:
@@ -31,7 +33,7 @@ class VerificationCode(BaseModel):
 	email: str
 
 @app.post("/api/extract")
-def	extract_recipe(request: VideoRequest):
+def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user)):
 	try:
 		url = request.url
 		validate_video_url(url)
@@ -86,20 +88,31 @@ def	login(request: LoginRequest):
 
 @app.post("/api/auth/submit-code")
 def	verify(request: VerificationCode):
-	db = SessionLocal()
-	otp = request.otp
-	verification = db.query(Verification).filter(
-		Verification.email == request.email,
-		Verification.code == otp,
-		Verification.used == False
-	).first()
+	try:
+		db = SessionLocal()
+		otp = request.otp
+		verification = db.query(Verification).filter(
+			Verification.email == request.email,
+			Verification.code == otp,
+			Verification.used == False
+		).first()
 
-	if not verification:
-		raise HTTPException(status_code=400, detail="Invalid code")
-	if verification.expires_at < datetime.now():
-		raise HTTPException(status_code=400, detail="Code expired")
+		if not verification:
+			raise HTTPException(status_code=400, detail="Invalid code")
+		if verification.expires_at < datetime.now():
+			raise HTTPException(status_code=400, detail="Code expired")
 
-	else:
-		verification.used = True
-		db.commit()
-		db.refresh(verification)
+		else:
+			verification.used = True
+			db.commit()
+			db.refresh(verification)
+			user = db.query(User).filter(User.email == request.email).first()
+			if not user:
+				user = User(email = request.email)
+				db.add(user)
+				db.commit()
+				db.refresh(user)
+			token = jwt_helper.create_jwt_token(user.id, user.email)
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	return {"status" : "success", "token" : token}
