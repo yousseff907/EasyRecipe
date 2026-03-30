@@ -1,3 +1,6 @@
+# Database
+backend/database.db
+
 # Environment variables
 .env
 .env.local
