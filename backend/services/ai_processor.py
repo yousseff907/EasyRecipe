@@ -22,7 +22,7 @@ def wait_until_active(file_name: str, timeout=60):
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-def analyze_with_ai(transcript: str, caption: str, video_path=None):
+def analyze_with_ai(transcript: str, caption: str, video_path=None) -> dict:
 	try:
 		prompt = f"""
 	You are a cooking assistant that extracts recipes from video content.
@@ -38,12 +38,12 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None):
 		"title": "Recipe name",
 		"ingredients": ["ingredient 1", "ingredient 2"],
 		"steps": ["step 1", "step 2"],
-		"prep_time": minutes as number or null,
-		"cook_time": minutes as number or null,
-		"servings": number or null
+		"prep_time": minutes as number,
+		"cook_time": minutes as number,
+		"servings": number
 	}}
 
-	If information is missing, use null for that field.
+	If information is missing, use what you see appropriate with your analysis.
 	"""
 
 		contents = [prompt]
@@ -59,7 +59,7 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None):
 				time.sleep(1)
 
 			contents.append(video_file)
-			response = client.models.generate_content(model='gemini-3-flash-preview', contents=contents)
+			response = client.models.generate_content(model='gemini-3.1-flash-lite-preview', contents=contents)
 			text = response.text.strip()
 
 			text = re.sub(r'^```json\s*', '', text)

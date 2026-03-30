@@ -12,6 +12,7 @@ from services.ai_processor import analyze_with_ai
 from services.email_service import send_email
 from services.auth_service import create_authentificator
 from utils import jwt_helper
+import json
 from utils.auth import get_current_user
 
 def	delete_file(path: str):
@@ -47,6 +48,14 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		if os.path.exists(video_path):
 			os.remove(video_path)
 
+		db = SessionLocal()
+		recipe = Recipe(user_id = current_user.id, video_url = url,
+				title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
+				steps = json.dumps(recipe_dictionary.get("steps")), prep_time = recipe_dictionary.get("prep_time"),
+				cook_time = recipe_dictionary.get("cook_time"), servings = recipe_dictionary.get("servings"))
+		db.add(recipe)
+		db.commit()
+		db.refresh(recipe)
 		print(recipe_dictionary)
 		return {"status": "success",
 				"recipe": recipe_dictionary}
@@ -58,10 +67,11 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 
-@app.post("/api/download-video")
-def download_video_endpoint(request: VideoRequest, background_task: BackgroundTasks):
+@app.post("/api/recipes/{recipe_id}/download-video")
+def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user)):
 	video_path = None
-	url = request.url
+	db = SessionLocal()
+	url = db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.id == recipe_id).first().video_url
 	try:
 		video_path = download_video(url)
 		background_task.add_task(delete_file, video_path)
@@ -90,6 +100,8 @@ def	login(request: LoginRequest):
 def	verify(request: VerificationCode):
 	try:
 		db = SessionLocal()
+		db.query(Verification).filter(Verification.email == request.email, Verification.expires_at < datetime.now()).delete()
+		db.commit()
 		otp = request.otp
 		verification = db.query(Verification).filter(
 			Verification.email == request.email,
@@ -116,3 +128,21 @@ def	verify(request: VerificationCode):
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 	return {"status" : "success", "token" : token}
+
+@app.get("/api/recipes")
+def get_recipes(current_user : User = Depends(get_current_user)):
+	pass
+
+@app.get("/api/recipes/{id}")
+def get_single_recipe(id : int, current_user : User = Depends(get_current_user)):
+	pass
+
+@app.delete("/api/recipes/{id}")
+def delete_recipe(id : int, current_user : User = Depends(get_current_user)):
+	db = SessionLocal()
+	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	db.delete(recipe)
+	db.commit()
+	return {"message": "Recipe deleted successfully"}

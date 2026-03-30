@@ -1,6 +1,6 @@
 from fastapi import Header, HTTPException
-from jwt_helper import verify_jwt_token
-from database import SessionLocal
+from utils.jwt_helper import verify_jwt_token
+from utils.database import SessionLocal
 from models.user import User
 
 def get_current_user(authorization: str = Header(None)) -> User:
