@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Recipes - EasyRecipe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pink-light': '#FFE4E9',
+                        'pink-medium': '#FFB3C1',
+                        'pink-dark': '#FF8FA3',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-pink-light to-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
+            <nav class="space-x-4">
+                <a href="extract.html" class="text-gray-600 hover:text-pink-dark transition">Extract</a>
+                <a href="recipes.html" class="text-pink-dark font-semibold">My Recipes</a>
+                <button onclick="logout()" class="text-gray-600 hover:text-pink-dark transition">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">My Saved Recipes</h2>
+            
+            <!-- Loading State -->
+            <div id="loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-dark"></div>
+                <p class="mt-4 text-gray-600">Loading recipes...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-12">
+                <p class="text-gray-500 text-lg mb-4">You haven't saved any recipes yet.</p>
+                <a href="extract.html" class="inline-block bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-3 rounded-lg transition">
+                    Extract Your First Recipe
+                </a>
+            </div>
+
+            <!-- Recipes Grid -->
+            <div id="recipesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
+
+            <!-- Message Display -->
+            <div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
+        </div>
+    </main>
+
+    <script src="js/recipes.js"></script>
+</body>
+</html>

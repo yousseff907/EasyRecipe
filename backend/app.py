@@ -15,6 +15,8 @@ from utils import jwt_helper
 import json
 from utils.auth import get_current_user
 
+from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
+
 def	delete_file(path: str):
 	try:
 		os.remove(path)
@@ -22,6 +24,14 @@ def	delete_file(path: str):
 		pass
 
 app = FastAPI()
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=["*"],  # Allow all origins for development
+	allow_credentials=True,
+	allow_methods=["*"],
+	allow_headers=["*"],
+)
 
 class VideoRequest(BaseModel):
 	url: str
@@ -39,7 +49,10 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		url = request.url
 		validate_video_url(url)
 		audio_path = download_audio(url)
-		caption = get_caption(url)
+		try:
+			caption = get_caption(url)
+		except:
+			caption = ""
 		transcript = extract_transcript(audio_path)
 		video_path = download_video(url)
 		recipe_dictionary = analyze_with_ai(transcript, caption, video_path)
@@ -67,11 +80,15 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 
-@app.post("/api/recipes/{recipe_id}/download-video")
+@app.get("/api/recipes/{recipe_id}/download-video")
 def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user)):
 	video_path = None
 	db = SessionLocal()
-	url = db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.id == recipe_id).first().video_url
+	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.id == recipe_id).first()
+	if not recipe:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	else:
+		url = recipe.video_url
 	try:
 		video_path = download_video(url)
 		background_task.add_task(delete_file, video_path)
@@ -131,11 +148,32 @@ def	verify(request: VerificationCode):
 
 @app.get("/api/recipes")
 def get_recipes(current_user : User = Depends(get_current_user)):
-	pass
+	db = SessionLocal()
+	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).all()
+	if not recipe:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	recipe_list = []
+	for r in recipe:
+		recipe_list.append({"id" : r.id, "title" : r.title})
+	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/{id}")
 def get_single_recipe(id : int, current_user : User = Depends(get_current_user)):
-	pass
+	db = SessionLocal()
+	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	return {
+		"id": recipe.id,
+		"title": recipe.title,
+		"ingredients": json.loads(recipe.ingredients),
+		"steps": json.loads(recipe.steps),
+		"prep_time": recipe.prep_time,
+		"cook_time": recipe.cook_time,
+		"servings": recipe.servings,
+		"video_url": recipe.video_url,
+		"created_at": recipe.created_at
+		}
 
 @app.delete("/api/recipes/{id}")
 def delete_recipe(id : int, current_user : User = Depends(get_current_user)):
