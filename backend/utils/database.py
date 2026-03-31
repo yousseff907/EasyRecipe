@@ -11,3 +11,10 @@ from models.user import User
 from models.verification import Verification
 
 Base.metadata.create_all(bind=engine)
+
+def get_db():
+	db = SessionLocal()
+	try:
+		yield db
+	finally:
+		db.close()

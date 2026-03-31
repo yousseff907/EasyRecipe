@@ -44,7 +44,7 @@ class VerificationCode(BaseModel):
 	email: str
 
 @app.post("/api/extract")
-def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user)):
+def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	try:
 		url = request.url
 		validate_video_url(url)
@@ -61,7 +61,6 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		if os.path.exists(video_path):
 			os.remove(video_path)
 
-		db = SessionLocal()
 		recipe = Recipe(user_id = current_user.id, video_url = url,
 				title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
 				steps = json.dumps(recipe_dictionary.get("steps")), prep_time = recipe_dictionary.get("prep_time"),
@@ -81,9 +80,8 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 
 
 @app.get("/api/recipes/{recipe_id}/download-video")
-def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user)):
+def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	video_path = None
-	db = SessionLocal()
 	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.id == recipe_id).first()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
@@ -102,9 +100,8 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 @app.post("/api/auth/request-code")
-def	login(request: LoginRequest):
+def	login(request: LoginRequest, db = Depends(get_db)):
 	try:
-		db = SessionLocal()
 		email = request.email
 		code = str(secrets.randbelow(1000000)).zfill(6)
 		verification = create_authentificator(db, code, email)
@@ -114,9 +111,8 @@ def	login(request: LoginRequest):
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 @app.post("/api/auth/submit-code")
-def	verify(request: VerificationCode):
+def	verify(request: VerificationCode, db = Depends(get_db)):
 	try:
-		db = SessionLocal()
 		db.query(Verification).filter(Verification.email == request.email, Verification.expires_at < datetime.now()).delete()
 		db.commit()
 		otp = request.otp
@@ -147,8 +143,7 @@ def	verify(request: VerificationCode):
 	return {"status" : "success", "token" : token}
 
 @app.get("/api/recipes")
-def get_recipes(current_user : User = Depends(get_current_user)):
-	db = SessionLocal()
+def get_recipes(current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).all()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
@@ -158,8 +153,7 @@ def get_recipes(current_user : User = Depends(get_current_user)):
 	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/{id}")
-def get_single_recipe(id : int, current_user : User = Depends(get_current_user)):
-	db = SessionLocal()
+def get_single_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
@@ -176,8 +170,7 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user))
 		}
 
 @app.delete("/api/recipes/{id}")
-def delete_recipe(id : int, current_user : User = Depends(get_current_user)):
-	db = SessionLocal()
+def delete_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
