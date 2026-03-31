@@ -1,5 +1,5 @@
 // API Base URL - change this if deploying to production
-const API_URL = 'http://localhost:8000';
+const API_URL = '';
 
 // Function 1: Request verification code
 function requestCode() {

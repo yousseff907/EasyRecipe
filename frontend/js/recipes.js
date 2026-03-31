@@ -1,5 +1,5 @@
 // API Base URL
-const API_URL = 'http://localhost:8000';
+const API_URL = '';
 
 // Check auth and load recipes on page load
 window.addEventListener('DOMContentLoaded', () => {

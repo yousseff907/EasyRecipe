@@ -1,5 +1,5 @@
 // API Base URL
-const API_URL = 'http://localhost:8000';
+const API_URL = '';
 
 // Get recipe ID from URL and load recipe
 window.addEventListener('DOMContentLoaded', () => {

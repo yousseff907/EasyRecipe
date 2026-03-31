@@ -1,5 +1,5 @@
 // API Base URL
-const API_URL = 'http://localhost:8000';
+const API_URL = '';
 
 // Check if user is logged in on page load
 window.addEventListener('DOMContentLoaded', () => {
