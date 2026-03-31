@@ -17,7 +17,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./frontend:/usr/share/nginx/html
+      - /etc/letsencrypt:/etc/letsencrypt:ro 
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
