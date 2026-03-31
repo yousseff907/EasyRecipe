@@ -35,14 +35,16 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None) -> dict:
 
 	Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
 	{{
-		"title": "Recipe name",
+		"title": "Recipe name [Creator name]",
 		"ingredients": ["ingredient 1", "ingredient 2"],
 		"steps": ["step 1", "step 2"],
 		"prep_time": minutes as number,
 		"cook_time": minutes as number,
 		"servings": number
 	}}
-
+	Extract the creator's name from the DESCRIPTION (usually after "By:" or as @username)
+	Format title as: "Recipe Name by @CreatorName" (e.g., "Pasta Carbonara by @ChefMike")
+	If creator name not found in description, just use the recipe name without "by @..."
 	If information is missing, use what you see appropriate with your analysis.
 	"""
 

@@ -59,7 +59,7 @@ def get_caption(url):
 			[
 				"yt-dlp",
 				"--skip-download",
-				"--print", "description",
+				"--print", "%(description)s\nBy: %(uploader)s",
 				url
 			],
 			check=True,
