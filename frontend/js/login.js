@@ -1,3 +1,11 @@
+// Check if already logged in - redirect if so
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        window.location.href = 'extract.html';
+    }
+});
+
 // API Base URL - change this if deploying to production
 const API_URL = '';
 
