@@ -157,3 +157,21 @@ function toggleNutrition() {
 		btn.textContent = '📊 Show Nutritional Facts';
 	}
 }
+
+// Function: Update character count
+function updateCharCount() {
+	const textarea = document.getElementById('instructions');
+	const counter = document.getElementById('charCount');
+	const length = textarea.value.length;
+
+	counter.textContent = length;
+
+	// Change color based on usage
+	if (length > 270) {
+		counter.className = 'text-red-500 font-semibold';
+	} else if (length > 200) {
+		counter.className = 'text-yellow-600';
+	} else {
+		counter.className = '';
+	}
+}

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from services.video_audio_downloader import *
 from services.audio_extractor import extract_transcript
 import os
@@ -35,7 +35,7 @@ app.add_middleware(
 
 class VideoRequest(BaseModel):
 	url: str
-	instructions : str = ""
+	instructions: str = Field(default="", max_length=300)
 
 class LoginRequest(BaseModel):
 	email: str
