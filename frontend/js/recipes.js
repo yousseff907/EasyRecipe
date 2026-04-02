@@ -5,7 +5,7 @@ const API_URL = '';
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         return;
     }
     loadRecipes();
@@ -30,7 +30,7 @@ function loadRecipes() {
     .then(response => {
         if (response.status === 401) {
             localStorage.removeItem('auth_token');
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return;
         }
         return response.json();
@@ -74,13 +74,13 @@ function displayRecipes(recipes) {
 
 // Function: Navigate to recipe detail page
 function viewRecipe(recipeId) {
-    window.location.href = `recipe.html?id=${recipeId}`;
+    window.location.href = `/recipe?id=${recipeId}`;
 }
 
 // Function: Logout
 function logout() {
     localStorage.removeItem('auth_token');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 // Helper: Show message

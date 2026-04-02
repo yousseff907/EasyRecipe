@@ -5,7 +5,7 @@ const API_URL = '';
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     }
 });
 
@@ -40,7 +40,7 @@ function extractRecipe() {
         if (response.status === 401) {
             // Token expired, redirect to login
             localStorage.removeItem('auth_token');
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return;
         }
         return response.json();
@@ -112,7 +112,7 @@ function displayRecipe(recipe) {
 // Function: Logout
 function logout() {
     localStorage.removeItem('auth_token');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 // Helper: Show message

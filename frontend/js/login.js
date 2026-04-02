@@ -2,7 +2,7 @@
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
     if (token) {
-        window.location.href = 'extract.html';
+        window.location.href = '/extract';
     }
 });
 
@@ -73,7 +73,7 @@ function verifyCode() {
             showMessage('Login successful! Redirecting...', false);
             // Redirect to extract page
             setTimeout(() => {
-                window.location.href = 'extract.html';
+                window.location.href = '/extract';
             }, 1000);
         } else {
             showMessage(data.detail || 'Invalid code', true);

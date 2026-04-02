@@ -5,7 +5,7 @@ const API_URL = '';
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
         return;
     }
     
@@ -14,7 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const recipeId = urlParams.get('id');
     
     if (!recipeId) {
-        window.location.href = 'recipes.html';
+        window.location.href = '/recipes';
         return;
     }
     
@@ -39,7 +39,7 @@ function loadRecipe(recipeId) {
     .then(response => {
         if (response.status === 401) {
             localStorage.removeItem('auth_token');
-            window.location.href = 'login.html';
+            window.location.href = '/login';
             return;
         }
         if (response.status === 404) {
@@ -174,7 +174,7 @@ function deleteRecipe() {
             showMessage('Recipe deleted!', false);
             // Redirect to recipes list
             setTimeout(() => {
-                window.location.href = 'recipes.html';
+                window.location.href = '/recipes';
             }, 1000);
         } else {
             showMessage('Failed to delete recipe', true);
@@ -188,7 +188,7 @@ function deleteRecipe() {
 // Function: Logout
 function logout() {
     localStorage.removeItem('auth_token');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 // Helper: Show message
