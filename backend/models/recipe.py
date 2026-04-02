@@ -15,5 +15,6 @@ class Recipe(Base):
 	prep_time = Column(Integer, nullable=True)
 	cook_time = Column(Integer, nullable=True)
 	servings = Column(Integer, nullable=True)
+	nutrition = Column(Text)
 	created_at = Column(DateTime, default=datetime.now)
 	owner = relationship("User", back_populates="recipes")

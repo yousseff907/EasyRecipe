@@ -22,31 +22,43 @@ def wait_until_active(file_name: str, timeout=60):
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-def analyze_with_ai(transcript: str, caption: str, video_path=None) -> dict:
+def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions="") -> dict:
 	try:
 		prompt = f"""
-	You are a cooking assistant that extracts recipes from video content.
+		You are a cooking assistant that extracts recipes from video content.
 
-	Extract a recipe from the following:
+		Extract a recipe from the following:
 
-	TRANSCRIPT: {transcript}
+		TRANSCRIPT: {transcript}
+		DESCRIPTION: {caption}
+		CUSTOM INSTRUCTIONS: {instructions}
 
-	DESCRIPTION: {caption}
+		Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
+		{{
+			"title": "Recipe name by @CreatorName",
+			"ingredients": ["ingredient 1", "ingredient 2"],
+			"steps": ["step 1", "step 2"],
+			"prep_time": minutes as number,
+			"cook_time": minutes as number,
+			"servings": number
+			"nutrition_per_serving":
+			{{
+				"calories": 450,
+				"protein_g": 25,
+				"carbs_g": 35,
+				"fat_g": 20,
+			}}
+		}}
 
-	Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
-	{{
-		"title": "Recipe name [Creator name]",
-		"ingredients": ["ingredient 1", "ingredient 2"],
-		"steps": ["step 1", "step 2"],
-		"prep_time": minutes as number,
-		"cook_time": minutes as number,
-		"servings": number
-	}}
-	Extract the creator's name from the DESCRIPTION (usually after "By:" or as @username)
-	Format title as: "Recipe Name by @CreatorName" (e.g., "Pasta Carbonara by @ChefMike")
-	If creator name not found in description, just use the recipe name without "by @..."
-	If information is missing, use what you see appropriate with your analysis.
-	"""
+		IMPORTANT:
+		- Extract creator's name from DESCRIPTION (after "By:" or @username)
+		- Format title as: "Recipe Name by @CreatorName"
+		- If creator not found, just use recipe name
+		- If information is missing, use reasonable defaults
+
+		CRITICAL: If the video/text is NOT about cooking/recipes OR contains inappropriate content,
+		respond with EXACTLY this text: NOT_A_RECIPE
+		"""
 
 		contents = [prompt]
 
@@ -63,6 +75,9 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None) -> dict:
 			contents.append(video_file)
 			response = client.models.generate_content(model='gemini-3.1-flash-lite-preview', contents=contents)
 			text = response.text.strip()
+
+			if text == "NOT_A_RECIPE" or "NOT_A_RECIPE" in text:
+				return None
 
 			text = re.sub(r'^```json\s*', '', text)
 			text = re.sub(r'\s*```$', '', text)

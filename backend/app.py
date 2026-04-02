@@ -27,7 +27,7 @@ app = FastAPI()
 
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=["*"],  # Allow all origins for development
+	allow_origins=["*"],
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],
@@ -35,6 +35,7 @@ app.add_middleware(
 
 class VideoRequest(BaseModel):
 	url: str
+	instructions : str = ""
 
 class LoginRequest(BaseModel):
 	email: str
@@ -47,6 +48,7 @@ class VerificationCode(BaseModel):
 def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	try:
 		url = request.url
+		instructions = request.instructions
 		validate_video_url(url)
 		audio_path = download_audio(url)
 		try:
@@ -55,16 +57,20 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 			caption = ""
 		transcript = extract_transcript(audio_path)
 		video_path = download_video(url)
-		recipe_dictionary = analyze_with_ai(transcript, caption, video_path)
+		recipe_dictionary = analyze_with_ai(transcript, caption, video_path, instructions)
 		if os.path.exists(audio_path):
 			os.remove(audio_path)
 		if os.path.exists(video_path):
 			os.remove(video_path)
 
+		if recipe_dictionary == None:
+			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
+
 		recipe = Recipe(user_id = current_user.id, video_url = url,
 				title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
 				steps = json.dumps(recipe_dictionary.get("steps")), prep_time = recipe_dictionary.get("prep_time"),
-				cook_time = recipe_dictionary.get("cook_time"), servings = recipe_dictionary.get("servings"))
+				cook_time = recipe_dictionary.get("cook_time"), servings = recipe_dictionary.get("servings"),
+				nutrition = recipe_dictionary.get("nutrition_per_serving"))
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
@@ -165,6 +171,7 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 		"prep_time": recipe.prep_time,
 		"cook_time": recipe.cook_time,
 		"servings": recipe.servings,
+		"nutrition_per_serving": json.loads(recipe.nutrition) if recipe.nutrition else None,
 		"video_url": recipe.video_url,
 		"created_at": recipe.created_at
 		}
