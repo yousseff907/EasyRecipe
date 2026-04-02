@@ -223,9 +223,9 @@ function toggleNutrition() {
 
 	if (panel.classList.contains('hidden')) {
 		panel.classList.remove('hidden');
-		btn.textContent = '📊 Hide Nutritional Facts';
+		btn.textContent = 'Hide Nutritional Facts';
 	} else {
 		panel.classList.add('hidden');
-		btn.textContent = '📊 Show Nutritional Facts';
+		btn.textContent = 'Show Nutritional Facts';
 	}
 }
