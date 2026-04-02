@@ -1,12 +1,6 @@
-// API Base URL
-const API_URL = '';
-
 // Check if user is logged in on page load
 window.addEventListener('DOMContentLoaded', () => {
-	const token = localStorage.getItem('auth_token');
-	if (!token) {
-		window.location.href = '/login';
-	}
+	checkAuth(); // Now from utils.js
 });
 
 // Function: Extract recipe from video URL
@@ -42,7 +36,6 @@ function extractRecipe() {
 	})
 		.then(response => {
 			if (response.status === 401) {
-				// Token expired, redirect to login
 				localStorage.removeItem('auth_token');
 				window.location.href = '/login';
 				return;
@@ -50,14 +43,13 @@ function extractRecipe() {
 			return response.json();
 		})
 		.then(data => {
-			// Hide loading
 			document.getElementById('loading').classList.add('hidden');
 			document.getElementById('extractBtn').disabled = false;
 
-			if (data.status === 'success') {
+			if (data && data.status === 'success') {
 				displayRecipe(data.recipe);
 				showMessage('Recipe extracted successfully!', false);
-			} else {
+			} else if (data) {
 				showMessage(data.detail || 'Failed to extract recipe', true);
 			}
 		})
@@ -112,66 +104,14 @@ function displayRecipe(recipe) {
 		});
 	}
 
-	// Nutrition data (hidden by default)
+	// Nutrition data
+	const nutritionBtn = document.getElementById('nutritionBtn');
 	if (recipe.nutrition_per_serving) {
-		const nutrition = recipe.nutrition_per_serving;
-		document.getElementById('nutritionCalories').textContent = nutrition.calories || '-';
-		document.getElementById('nutritionProtein').textContent = nutrition.protein_g ? `${nutrition.protein_g}g` : '-';
-		document.getElementById('nutritionCarbs').textContent = nutrition.carbs_g ? `${nutrition.carbs_g}g` : '-';
-		document.getElementById('nutritionFat').textContent = nutrition.fat_g ? `${nutrition.fat_g}g` : '-';
-	}
-}
-// Function: Logout
-function logout() {
-	localStorage.removeItem('auth_token');
-	window.location.href = '/login';
-}
-
-// Helper: Show message
-function showMessage(text, isError) {
-	const msgDiv = document.getElementById('message');
-	msgDiv.textContent = text;
-	msgDiv.className = isError
-		? 'mt-4 p-4 rounded-lg bg-red-100 text-red-700'
-		: 'mt-4 p-4 rounded-lg bg-green-100 text-green-700';
-	msgDiv.classList.remove('hidden');
-
-	// Auto-hide success messages
-	if (!isError) {
-		setTimeout(() => {
-			msgDiv.classList.add('hidden');
-		}, 3000);
-	}
-}
-
-// Function: Toggle nutrition panel visibility
-function toggleNutrition() {
-	const panel = document.getElementById('nutritionPanel');
-	const btn = document.getElementById('nutritionBtn');
-
-	if (panel.classList.contains('hidden')) {
-		panel.classList.remove('hidden');
-		btn.textContent = 'Hide Nutritional Facts';
+		nutritionBtn.classList.remove('hidden');
+		displayNutrition(recipe.nutrition_per_serving); // From utils.js
 	} else {
-		panel.classList.add('hidden');
-		btn.textContent = 'Show Nutritional Facts';
+		nutritionBtn.classList.add('hidden');
 	}
 }
 
-// Function: Update character count
-function updateCharCount() {
-	const textarea = document.getElementById('instructions');
-	const counter = document.getElementById('charCount');
-	const length = textarea.value.length;
-
-	counter.textContent = length;
-
-	// Change color based on usage
-	if (length > 270) {
-		counter.className = 'text-red-500 font-semibold';
-	} else if (length > 200) {
-		counter.className = 'text-yellow-600';
-	} else {
-		counter.className = '';
-	}
-}
+// logout() and showMessage() and toggleNutrition() are now in utils.js - removed from here!

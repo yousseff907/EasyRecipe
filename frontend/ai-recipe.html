@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AI Recipe Builder - EasyRecipe</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						'pink-light': '#FFE4E9',
+						'pink-medium': '#FFB3C1',
+						'pink-dark': '#FF8FA3',
+					}
+				}
+			}
+		}
+	</script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-light to-white min-h-screen">
+	<!-- Header with Hamburger Menu -->
+	<header class="bg-white shadow-sm">
+		<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+			<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
+
+			<button id="menuBtn" onclick="toggleMenu()"
+				class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
+				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16">
+					</path>
+				</svg>
+			</button>
+		</div>
+
+		<div id="mobileMenu"
+			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
+			<nav class="py-2">
+				<a href="/extract"
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					Extract from Video
+				</a>
+				<a href="/make-your-own"
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					Make Your Own
+				</a>
+				<a href="/ai-recipe" class="block px-6 py-3 text-pink-dark font-semibold bg-pink-light">
+					AI Recipe Builder
+				</a>
+				<a href="/recipes"
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					My Recipes
+				</a>
+				<hr class="my-2 border-pink-light">
+				<button onclick="logout()"
+					class="block w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition">
+					Logout
+				</button>
+			</nav>
+		</div>
+	</header>
+
+	<!-- Main Content -->
+	<main class="max-w-4xl mx-auto px-4 py-8">
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<div class="text-center mb-8">
+				<h2 class="text-3xl font-bold text-gray-800 mb-2">AI Recipe Builder</h2>
+				<p class="text-gray-600">Tell us what ingredients you have and we'll create a recipe for you!</p>
+			</div>
+
+			<!-- Input Form -->
+			<div id="inputForm" class="space-y-6">
+				<!-- Ingredients -->
+				<div>
+					<label for="ingredients" class="block text-sm font-medium text-gray-700 mb-2">
+						What ingredients do you have? <span class="text-red-500">*</span>
+						<span class="text-xs text-gray-500">(one per line)</span>
+					</label>
+					<textarea id="ingredients" rows="8" placeholder="chicken breast
+rice
+bell peppers
+onion
+garlic
+soy sauce
+olive oil" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none resize-none font-mono text-sm"></textarea>
+					<p class="text-xs text-gray-500 mt-1">Enter the ingredients you have available (max 100)</p>
+				</div>
+
+				<!-- Custom Instructions -->
+				<div>
+					<label for="instructions" class="block text-sm font-medium text-gray-700 mb-2">
+						Any special requests? <span class="text-gray-400 text-xs">(Optional)</span>
+					</label>
+					<textarea id="instructions" rows="3" maxlength="300"
+						oninput="updateCharCount('instructions', 'charCount', 300)"
+						placeholder="e.g., 'make it spicy', 'vegetarian', 'under 30 minutes', 'kid-friendly'"
+						class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none resize-none"></textarea>
+					<p class="text-xs text-gray-500 mt-1">
+						<span id="charCount">0</span>/300 characters
+					</p>
+				</div>
+
+				<!-- Generate Button -->
+				<button onclick="generateRecipe()" id="generateBtn"
+					class="w-full bg-pink-dark hover:bg-pink-medium text-white font-semibold py-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg text-lg">
+					Generate Recipe
+				</button>
+			</div>
+
+			<!-- Loading State -->
+			<div id="loading" class="hidden text-center py-12">
+				<div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-pink-dark mb-4"></div>
+				<p class="text-gray-600 text-lg">AI is cooking up something delicious...</p>
+				<p class="text-gray-500 text-sm mt-2">This may take up to 30 seconds</p>
+			</div>
+
+			<!-- Recipe Display -->
+			<div id="recipeDisplay" class="hidden">
+				<div class="border-t pt-6">
+					<h3 id="recipeTitle" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+
+					<div class="grid grid-cols-3 gap-4 mb-6">
+						<div class="text-center p-3 bg-pink-light rounded-lg">
+							<p class="text-sm text-gray-600">Prep Time</p>
+							<p id="prepTime" class="text-lg font-semibold text-pink-dark">-</p>
+						</div>
+						<div class="text-center p-3 bg-pink-light rounded-lg">
+							<p class="text-sm text-gray-600">Cook Time</p>
+							<p id="cookTime" class="text-lg font-semibold text-pink-dark">-</p>
+						</div>
+						<div class="text-center p-3 bg-pink-light rounded-lg">
+							<p class="text-sm text-gray-600">Servings</p>
+							<p id="servings" class="text-lg font-semibold text-pink-dark">-</p>
+						</div>
+					</div>
+
+					<div class="mb-6">
+						<h4 class="text-xl font-semibold text-gray-800 mb-3">Ingredients</h4>
+						<ul id="ingredientsList" class="space-y-2"></ul>
+					</div>
+
+					<div class="mb-6">
+						<h4 class="text-xl font-semibold text-gray-800 mb-3">Instructions</h4>
+						<ol id="stepsList" class="space-y-3"></ol>
+					</div>
+
+					<!-- Nutritional Facts Toggle Button -->
+					<div class="mt-6">
+						<button onclick="toggleNutrition()" id="nutritionBtn"
+							class="w-full bg-white border-2 border-pink-dark text-pink-dark px-4 py-3 rounded-lg hover:bg-pink-light transition font-semibold">
+							Show Nutritional Facts
+						</button>
+					</div>
+
+					<!-- Nutrition Panel -->
+					<div id="nutritionPanel" class="hidden mt-4">
+						<div
+							class="bg-gradient-to-r from-pink-light to-white p-6 rounded-lg border-2 border-pink-medium">
+							<h4 class="text-xl font-semibold text-gray-800 mb-2">
+								Nutritional Facts
+								<span class="text-sm text-gray-500 font-normal">(per serving, estimated)</span>
+							</h4>
+
+							<div class="grid grid-cols-2 gap-3 mt-4">
+								<div class="bg-white p-4 rounded-lg shadow-sm">
+									<p class="text-sm text-gray-600 mb-1">Calories</p>
+									<p id="nutritionCalories" class="text-2xl font-bold text-pink-dark">-</p>
+								</div>
+								<div class="bg-white p-4 rounded-lg shadow-sm">
+									<p class="text-sm text-gray-600 mb-1">Protein</p>
+									<p id="nutritionProtein" class="text-2xl font-bold text-pink-dark">-</p>
+								</div>
+								<div class="bg-white p-4 rounded-lg shadow-sm">
+									<p class="text-sm text-gray-600 mb-1">Carbs</p>
+									<p id="nutritionCarbs" class="text-2xl font-bold text-pink-dark">-</p>
+								</div>
+								<div class="bg-white p-4 rounded-lg shadow-sm">
+									<p class="text-sm text-gray-600 mb-1">Fat</p>
+									<p id="nutritionFat" class="text-2xl font-bold text-pink-dark">-</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Action Buttons -->
+					<div class="mt-6 flex gap-4">
+						<button onclick="resetForm()"
+							class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-lg transition">
+							Try Again
+						</button>
+						<button onclick="saveRecipe()" id="saveBtn"
+							class="flex-1 bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+							Save to My Recipes
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Message Display -->
+			<div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
+		</div>
+	</main>
+
+	<script src="/js/utils.js"></script>
+	<script src="/js/ai-recipe.js"></script>
+</body>
+
+</html>

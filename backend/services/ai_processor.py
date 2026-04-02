@@ -40,13 +40,13 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 			"steps": ["step 1", "step 2"],
 			"prep_time": minutes as number,
 			"cook_time": minutes as number,
-			"servings": number
+			"servings": number,
 			"nutrition_per_serving":
 			{{
 				"calories": 450,
 				"protein_g": 25,
 				"carbs_g": 35,
-				"fat_g": 20,
+				"fat_g": 20
 			}}
 		}}
 
@@ -82,6 +82,55 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 			text = re.sub(r'^```json\s*', '', text)
 			text = re.sub(r'\s*```$', '', text)
 			text = text.strip()
+
+		return json.loads(text)
+	except json.JSONDecodeError as e:
+		raise ValueError(f"Invalid JSON returned by model: {text}") from e
+	except Exception as e:
+		print("FULL ERROR:", repr(e))
+		raise
+
+def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
+	try:
+		prompt = f"""
+		You are a cooking assistant that builds recipes from random ingredients in the house.
+
+		Create a recipe using the following:
+
+		INGREDIENTS: {ingredients}
+		CUSTOM INSTRUCTIONS: {instructions}
+
+		Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
+		{{
+			"title": "Recipe name",
+			"ingredients": ["ingredient 1", "ingredient 2"],
+			"steps": ["step 1", "step 2"],
+			"prep_time": minutes as number,
+			"cook_time": minutes as number,
+			"servings": number,
+			"nutrition_per_serving":
+			{{
+				"calories": 450,
+				"protein_g": 25,
+				"carbs_g": 35,
+				"fat_g": 20
+			}}
+		}}
+
+		CRITICAL: If the text is NOT about cooking/recipes OR contains inappropriate content,
+		respond with EXACTLY this text: NOT_A_RECIPE
+		"""
+		contents = [prompt]
+
+		response = client.models.generate_content(model='gemini-3.1-flash-lite-preview', contents=contents)
+		text = response.text.strip()
+
+		if text == "NOT_A_RECIPE" or "NOT_A_RECIPE" in text:
+			return None
+
+		text = re.sub(r'^```json\s*', '', text)
+		text = re.sub(r'\s*```$', '', text)
+		text = text.strip()
 
 		return json.loads(text)
 	except json.JSONDecodeError as e:

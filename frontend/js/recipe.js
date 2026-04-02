@@ -1,15 +1,7 @@
-// API Base URL
-const API_URL = '';
-
 // Get recipe ID from URL and load recipe
 window.addEventListener('DOMContentLoaded', () => {
-	const token = localStorage.getItem('auth_token');
-	if (!token) {
-		window.location.href = '/login';
-		return;
-	}
+	checkAuth(); // From utils.js
 
-	// Get recipe ID from URL parameter
 	const urlParams = new URLSearchParams(window.location.search);
 	const recipeId = urlParams.get('id');
 
@@ -25,11 +17,9 @@ window.addEventListener('DOMContentLoaded', () => {
 function loadRecipe(recipeId) {
 	const token = localStorage.getItem('auth_token');
 
-	// Show loading
 	document.getElementById('loading').classList.remove('hidden');
 	document.getElementById('recipeContent').classList.add('hidden');
 
-	// Call backend
 	fetch(`${API_URL}/api/recipes/${recipeId}`, {
 		method: 'GET',
 		headers: {
@@ -64,7 +54,6 @@ function displayRecipe(recipe) {
 	document.getElementById('loading').classList.add('hidden');
 	document.getElementById('recipeContent').classList.remove('hidden');
 
-	// Store recipe ID for download/delete
 	window.currentRecipeId = recipe.id;
 
 	// Title
@@ -105,14 +94,15 @@ function displayRecipe(recipe) {
             `;
 			stepsList.appendChild(li);
 		});
-		// Nutrition data (hidden by default)
-		if (recipe.nutrition_per_serving) {
-			const nutrition = recipe.nutrition_per_serving;
-			document.getElementById('nutritionCalories').textContent = nutrition.calories || '-';
-			document.getElementById('nutritionProtein').textContent = nutrition.protein_g ? `${nutrition.protein_g}g` : '-';
-			document.getElementById('nutritionCarbs').textContent = nutrition.carbs_g ? `${nutrition.carbs_g}g` : '-';
-			document.getElementById('nutritionFat').textContent = nutrition.fat_g ? `${nutrition.fat_g}g` : '-';
-		}
+	}
+
+	// Nutrition
+	const nutritionBtn = document.getElementById('nutritionBtn');
+	if (recipe.nutrition_per_serving) {
+		nutritionBtn.classList.remove('hidden');
+		displayNutrition(recipe.nutrition_per_serving); // From utils.js
+	} else {
+		nutritionBtn.classList.add('hidden');
 	}
 }
 
@@ -125,7 +115,6 @@ function downloadVideo() {
 
 	showMessage('Downloading video...', false);
 
-	// Call backend download endpoint
 	fetch(`${API_URL}/api/recipes/${recipeId}/download-video`, {
 		method: 'GET',
 		headers: {
@@ -140,7 +129,6 @@ function downloadVideo() {
 			}
 		})
 		.then(blob => {
-			// Create download link
 			const url = window.URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
@@ -162,14 +150,12 @@ function deleteRecipe() {
 
 	if (!recipeId) return;
 
-	// Confirm deletion
 	if (!confirm('Are you sure you want to delete this recipe?')) {
 		return;
 	}
 
 	const token = localStorage.getItem('auth_token');
 
-	// Call backend
 	fetch(`${API_URL}/api/recipes/${recipeId}`, {
 		method: 'DELETE',
 		headers: {
@@ -180,7 +166,6 @@ function deleteRecipe() {
 		.then(data => {
 			if (data.message) {
 				showMessage('Recipe deleted!', false);
-				// Redirect to recipes list
 				setTimeout(() => {
 					window.location.href = '/recipes';
 				}, 1000);
@@ -193,39 +178,4 @@ function deleteRecipe() {
 		});
 }
 
-// Function: Logout
-function logout() {
-	localStorage.removeItem('auth_token');
-	window.location.href = '/login';
-}
-
-// Helper: Show message
-function showMessage(text, isError) {
-	const msgDiv = document.getElementById('message');
-	msgDiv.textContent = text;
-	msgDiv.className = isError
-		? 'mt-4 p-4 rounded-lg bg-red-100 text-red-700'
-		: 'mt-4 p-4 rounded-lg bg-green-100 text-green-700';
-	msgDiv.classList.remove('hidden');
-
-	// Auto-hide success messages
-	if (!isError) {
-		setTimeout(() => {
-			msgDiv.classList.add('hidden');
-		}, 3000);
-	}
-}
-
-// Function: Toggle nutrition panel visibility
-function toggleNutrition() {
-	const panel = document.getElementById('nutritionPanel');
-	const btn = document.getElementById('nutritionBtn');
-
-	if (panel.classList.contains('hidden')) {
-		panel.classList.remove('hidden');
-		btn.textContent = 'Hide Nutritional Facts';
-	} else {
-		panel.classList.add('hidden');
-		btn.textContent = 'Show Nutritional Facts';
-	}
-}
+// logout(), showMessage(), toggleNutrition(), displayNutrition() are now in utils.js - removed from here!

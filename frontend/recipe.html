@@ -22,14 +22,38 @@
 </head>
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen">
-	<!-- Header -->
+	<!-- Header with Hamburger Menu -->
 	<header class="bg-white shadow-sm">
 		<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 			<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
-			<nav class="space-x-4">
-				<a href="/extract" class="text-gray-600 hover:text-pink-dark transition">Extract</a>
-				<a href="/recipes" class="text-gray-600 hover:text-pink-dark transition">My Recipes</a>
-				<button onclick="logout()" class="text-gray-600 hover:text-pink-dark transition">Logout</button>
+			
+			<!-- Hamburger Menu Button -->
+			<button id="menuBtn" onclick="toggleMenu()" class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
+				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+			</button>
+		</div>
+		
+		<!-- Dropdown Menu -->
+		<div id="mobileMenu" class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
+			<nav class="py-2">
+				<a href="/extract" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					Extract from Video
+				</a>
+				<a href="/make-your-own" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					Make Your Own
+				</a>
+				<a href="/ai-recipe" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					AI Recipe Builder
+				</a>
+				<a href="/recipes" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
+					My Recipes
+				</a>
+				<hr class="my-2 border-pink-light">
+				<button onclick="logout()" class="block w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition">
+					Logout
+				</button>
 			</nav>
 		</div>
 	</header>
@@ -145,6 +169,7 @@
 		</div>
 	</main>
 
+	<script src="/js/utils.js"></script>
 	<script src="/js/recipe.js"></script>
 </body>
 
