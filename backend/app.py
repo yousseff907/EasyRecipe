@@ -70,7 +70,7 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 				title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
 				steps = json.dumps(recipe_dictionary.get("steps")), prep_time = recipe_dictionary.get("prep_time"),
 				cook_time = recipe_dictionary.get("cook_time"), servings = recipe_dictionary.get("servings"),
-				nutrition = recipe_dictionary.get("nutrition_per_serving"))
+				nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
