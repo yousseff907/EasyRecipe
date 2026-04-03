@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Contact - EasyRecipe</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						'pink-light': '#FFE4E9',
+						'pink-medium': '#FFB3C1',
+						'pink-dark': '#FF8FA3',
+					}
+				}
+			}
+		}
+	</script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
+	<!-- Header -->
+	<header class="bg-white shadow-sm">
+		<div class="w-full px-4 py-4">
+			<div class="flex justify-between items-center">
+				<a href="/" class="text-2xl font-bold text-pink-dark">EasyRecipe</a>
+				<div id="google_translate_element"></div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Main Content -->
+	<main class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<h1 class="text-4xl font-bold text-gray-800 mb-4">Contact Us</h1>
+			<p class="text-gray-600 mb-8">Have questions or feedback? Get in touch!</p>
+
+			<div class="space-y-6">
+				<div class="bg-pink-light p-6 rounded-lg">
+					<h2 class="text-2xl font-bold text-gray-800 mb-4">Get in Touch</h2>
+
+					<div class="space-y-4">
+						<div class="flex items-start">
+							<div
+								class="flex-shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center mr-4">
+								<svg class="w-5 h-5 text-pink-dark" fill="none" stroke="currentColor"
+									viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+									</path>
+								</svg>
+							</div>
+							<div>
+								<h3 class="font-semibold text-gray-800">Email</h3>
+								<a href="mailto:youssef.itani.11.11@gmail.com"
+									class="text-pink-dark hover:underline">youssef.itani.11.11@gmail.com</a>
+							</div>
+						</div>
+
+						<div class="flex items-start">
+							<div
+								class="flex-shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center mr-4">
+								<svg class="w-5 h-5 text-pink-dark" fill="none" stroke="currentColor"
+									viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+									</path>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+								</svg>
+							</div>
+							<div>
+								<h3 class="font-semibold text-gray-800">Location</h3>
+								<p class="text-gray-600">Lebanon</p>
+							</div>
+						</div>
+
+						<div class="flex items-start">
+							<div
+								class="flex-shrink-0 w-10 h-10 bg-white rounded-full flex items-center justify-center mr-4">
+								<svg class="w-5 h-5 text-pink-dark" fill="none" stroke="currentColor"
+									viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+								</svg>
+							</div>
+							<div>
+								<h3 class="font-semibold text-gray-800">Response Time</h3>
+								<p class="text-gray-600">We typically respond within 24-48 hours</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-gradient-to-r from-pink-light to-white p-6 rounded-lg border-2 border-pink-medium">
+					<h2 class="text-2xl font-bold text-gray-800 mb-4">Send Us a Message</h2>
+					<p class="text-gray-600 mb-4">
+						Click the button below to email us directly:
+					</p>
+					<a href="mailto:youssef.itani.11.11@gmail.com?subject=EasyRecipe Contact"
+						class="inline-block bg-pink-dark hover:bg-pink-medium text-white font-semibold px-8 py-3 rounded-lg transition shadow-md hover:shadow-lg">
+						Email Us
+					</a>
+				</div>
+			</div>
+
+			<div class="mt-8 pt-6 border-t">
+				<a href="/" class="text-pink-dark hover:text-pink-medium font-semibold">← Back to Home</a>
+			</div>
+		</div>
+	</main>
+
+	<!-- Footer -->
+	<footer class="bg-white border-t">
+		<div class="w-full px-4 py-6 text-center text-gray-600 text-sm">
+			<p>&copy; 2026 EasyRecipe. All rights reserved.</p>
+			<div class="mt-2 space-x-4">
+				<a href="/privacy" class="text-pink-dark hover:underline">Privacy Policy</a>
+				<a href="/terms" class="text-pink-dark hover:underline">Terms of Service</a>
+				<a href="/about" class="text-pink-dark hover:underline">About</a>
+				<a href="/contact" class="text-pink-dark hover:underline">Contact</a>
+			</div>
+		</div>
+	</footer>
+
+	<!-- Google Translate Script -->
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({
+				pageLanguage: 'en',
+				includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
+				layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+				autoDisplay: false
+			}, 'google_translate_element');
+		}
+	</script>
+	<script type="text/javascript"
+		src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+	<style>
+		#google_translate_element {
+			display: inline-block;
+		}
+
+		.goog-te-banner-frame.skiptranslate {
+			display: none !important;
+		}
+
+		body {
+			top: 0px !important;
+		}
+
+		.goog-te-combo {
+			padding: 8px 12px;
+			border: 2px solid #FFB3C1;
+			border-radius: 8px;
+			background-color: white;
+			color: #FF8FA3;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			outline: none;
+			transition: all 0.2s;
+		}
+
+		.goog-te-combo:hover {
+			border-color: #FF8FA3;
+			background-color: #FFE4E9;
+		}
+
+		.goog-te-combo:focus {
+			border-color: #FF8FA3;
+			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
+		}
+	</style>
+</body>
+
+</html>
