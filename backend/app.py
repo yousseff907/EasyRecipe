@@ -214,6 +214,7 @@ def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_
 						servings = self_made.servings,
 						nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition else None
 						)
+		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
 		return {"status": "success", "recipe_id": recipe.id}
