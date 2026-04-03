@@ -66,11 +66,15 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		if recipe_dictionary == None:
 			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
 
-		recipe = Recipe(user_id = current_user.id, video_url = url,
-				title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
-				steps = json.dumps(recipe_dictionary.get("steps")), prep_time = recipe_dictionary.get("prep_time"),
-				cook_time = recipe_dictionary.get("cook_time"), servings = recipe_dictionary.get("servings"),
-				nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
+		recipe = Recipe(user_id = current_user.id,
+						video_url = url,
+						title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
+						steps = json.dumps(recipe_dictionary.get("steps")),
+						prep_time = recipe_dictionary.get("prep_time"),
+						cook_time = recipe_dictionary.get("cook_time"),
+						servings = recipe_dictionary.get("servings"),
+						serving_size = recipe_dictionary.get("serving size"),
+						nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
@@ -199,6 +203,7 @@ class SelfMadeRecipe(BaseModel):
 	prep_time : int | None = None
 	cook_time : int | None = None
 	servings : int | None = None
+	serving_size : int | None = None
 	nutrition : NutritionInput | None = None
 
 @app.post("/api/make_your_own")
@@ -212,6 +217,7 @@ def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_
 						prep_time = self_made.prep_time,
 						cook_time = self_made.cook_time,
 						servings = self_made.servings,
+						serving_size = self_made.serving_size,
 						nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition else None
 						)
 		db.add(recipe)
@@ -242,6 +248,7 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 						prep_time = recipe_dictionary.get("prep_time"),
 						cook_time = recipe_dictionary.get("cook_time"),
 						servings = recipe_dictionary.get("servings"),
+						serving_size = recipe_dictionary.get("serving size"),
 						nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
 		db.add(recipe)
 		db.commit()

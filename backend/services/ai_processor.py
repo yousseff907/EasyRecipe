@@ -41,6 +41,7 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 			"prep_time": minutes as number,
 			"cook_time": minutes as number,
 			"servings": number,
+			"serving size": number,
 			"nutrition_per_serving":
 			{{
 				"calories": amount as number,
@@ -108,6 +109,7 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 			"prep_time": minutes as number,
 			"cook_time": minutes as number,
 			"servings": number,
+			"serving size": number,
 			"nutrition_per_serving":
 			{{
 				"calories": amount as number,

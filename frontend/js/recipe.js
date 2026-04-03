@@ -63,6 +63,7 @@ function displayRecipe(recipe) {
 	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';
 	document.getElementById('cookTime').textContent = recipe.cook_time ? `${recipe.cook_time} min` : '-';
 	document.getElementById('servings').textContent = recipe.servings || '-';
+	document.getElementById('servingSize').textContent = recipe.serving_size || '-';
 
 	// Ingredients
 	const ingredientsList = document.getElementById('ingredientsList');

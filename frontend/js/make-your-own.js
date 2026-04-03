@@ -13,6 +13,7 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 	const prepTime = document.getElementById('prepTime').value;
 	const cookTime = document.getElementById('cookTime').value;
 	const servings = document.getElementById('servings').value;
+	const servingSize = document.getElementById('serving_size').value;
 
 	// Parse ingredients and steps
 	const ingredients = ingredientsText
@@ -75,6 +76,7 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		prep_time: prepTime ? parseInt(prepTime) : null,
 		cook_time: cookTime ? parseInt(cookTime) : null,
 		servings: servings ? parseInt(servings) : null,
+		serving_size: servingSize ? parseInt(servingSize) : null,
 		nutrition: nutrition
 	};
 
