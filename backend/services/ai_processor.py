@@ -27,6 +27,12 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 		prompt = f"""
 		You are a cooking assistant that extracts recipes from video content.
 
+		IMPORTANT INSTRUCTIONS:
+		- Use METRIC units (grams, ml, liters) as the primary measurement system
+		- For common cooking measurements, also include volume measures (cups, tablespoons, teaspoons)
+		- For serving_size, use grams (g) for solid foods and milliliters (ml) for liquids
+		- Ingredients should use the most practical unit (e.g., "200g flour", "2 cups milk", "1 tsp salt")
+
 		Extract a recipe from the following:
 
 		TRANSCRIPT: {transcript}
@@ -50,6 +56,14 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 				"fat_g": amount as number
 			}}
 		}}
+
+		Rules:
+		- Use grams (g) and milliliters (ml) for precise measurements
+		- Use cups, tablespoons (tbsp), teaspoons (tsp) for common cooking measures
+		- serving_size should be a string like "250g" or "300ml" or "1 cup"
+		- If units aren't clear from transcript, estimate based on typical recipes
+		- nutrition values are per serving in grams
+		- All numbers should be integers (no decimals)
 
 		IMPORTANT:
 		- Extract creator's name from DESCRIPTION (after "By:" or @username)
@@ -96,6 +110,12 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 		prompt = f"""
 		You are a cooking assistant that builds recipes from random ingredients in the house.
 
+		IMPORTANT INSTRUCTIONS:
+		- Use METRIC units (grams, ml, liters) as the primary measurement system
+		- For common cooking measurements, also include volume measures (cups, tablespoons, teaspoons)
+		- For serving_size, use grams (g) for solid foods and milliliters (ml) for liquids
+		- Ingredients should use the most practical unit (e.g., "200g flour", "2 cups milk", "1 tsp salt")
+
 		Create a recipe using the following:
 
 		INGREDIENTS: {ingredients}
@@ -118,6 +138,14 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 				"fat_g": amount as number
 			}}
 		}}
+
+		Rules:
+		- Use grams (g) and milliliters (ml) for precise measurements
+		- Use cups, tablespoons (tbsp), teaspoons (tsp) for common cooking measures
+		- serving_size should be a string like "250g" or "300ml" or "1 cup"
+		- If units aren't clear from transcript, estimate based on typical recipes
+		- nutrition values are per serving in grams
+		- All numbers should be integers (no decimals)
 
 		CRITICAL: If the text is NOT about cooking/recipes OR contains inappropriate content,
 		respond with EXACTLY this text: NOT_A_RECIPE
