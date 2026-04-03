@@ -22,6 +22,7 @@
 </head>
 
 <!-- AFTER (correct) -->
+
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
 	<!-- Header with Hamburger Menu -->
 	<!-- Header with Hamburger Menu & Translate -->
@@ -174,8 +175,10 @@
 				</a>
 			</div>
 
-			<!-- Recipes Grid -->
-			<div id="recipesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
+			<!-- Recipes List Container -->
+			<div id="recipesList" class="hidden">
+				<div id="recipesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+			</div>
 
 			<!-- Message Display -->
 			<div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
