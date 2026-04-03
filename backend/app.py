@@ -183,6 +183,8 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 @app.delete("/api/recipes/{id}")
 def delete_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
+	if recipe.user_id != current_user.id:
+		raise HTTPException(status_code=403, detail="You do not have permissions")
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	db.delete(recipe)
