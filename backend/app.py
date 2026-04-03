@@ -143,7 +143,7 @@ def	verify(request: VerificationCode, db = Depends(get_db)):
 			db.refresh(verification)
 			user = db.query(User).filter(User.email == request.email).first()
 			if not user:
-				user = User(email = request.email)
+				user = User(email = request.email, username = request.email.split('@')[0])
 				db.add(user)
 				db.commit()
 				db.refresh(user)
@@ -262,3 +262,32 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+
+class Feedback(BaseModel):
+	feedback : str
+
+@app.delete("/api/delete_account")
+def delete_account(request : Feedback, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	try:
+		with open("feedback.txt", '+a') as f:
+			f.write(request.feedback+'\n')
+		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
+		db.delete(current_user)
+		db.commit()
+		return {"message": "Account deleted successfully"}
+	except Exception as e:
+		raise HTTPException(status_code=404, detail=str(e))
+
+
+class String(BaseModel):
+	string : str
+
+@app.post("/api/change_username")
+def change_username(request : String, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	existing = db.query(User).filter(User.username == request.string).first()
+	if existing:
+		raise HTTPException(status_code=400, detail="Username already taken")
+	current_user.username = request.string
+	db.commit()
+	db.refresh(current_user)
