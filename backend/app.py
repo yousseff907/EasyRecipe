@@ -212,7 +212,7 @@ def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_
 						prep_time = self_made.prep_time,
 						cook_time = self_made.cook_time,
 						servings = self_made.servings,
-						nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition_per_serving else None
+						nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition else None
 						)
 		db.commit()
 		db.refresh(recipe)
