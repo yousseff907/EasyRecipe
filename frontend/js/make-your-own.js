@@ -76,7 +76,7 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		prep_time: prepTime ? parseInt(prepTime) : null,
 		cook_time: cookTime ? parseInt(cookTime) : null,
 		servings: servings ? parseInt(servings) : null,
-		serving_size: servingSize ? parseInt(servingSize) : null,
+		serving_size: servingSize || null,
 		nutrition: nutrition
 	};
 

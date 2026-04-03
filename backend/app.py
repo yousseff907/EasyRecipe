@@ -203,7 +203,7 @@ class SelfMadeRecipe(BaseModel):
 	prep_time : int | None = None
 	cook_time : int | None = None
 	servings : int | None = None
-	serving_size : int | None = None
+	serving_size : str | None = None
 	nutrition : NutritionInput | None = None
 
 @app.post("/api/make_your_own")
