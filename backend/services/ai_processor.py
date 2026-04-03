@@ -43,10 +43,10 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 			"servings": number,
 			"nutrition_per_serving":
 			{{
-				"calories": 450,
-				"protein_g": 25,
-				"carbs_g": 35,
-				"fat_g": 20
+				"calories": amount as number,
+				"protein_g": amount as number,
+				"carbs_g": amount as number,
+				"fat_g": amount as number
 			}}
 		}}
 
@@ -110,10 +110,10 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 			"servings": number,
 			"nutrition_per_serving":
 			{{
-				"calories": 450,
-				"protein_g": 25,
-				"carbs_g": 35,
-				"fat_g": 20
+				"calories": amount as number,
+				"protein_g": amount as number,
+				"carbs_g": amount as number,
+				"fat_g": amount as number
 			}}
 		}}
 
