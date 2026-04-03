@@ -23,19 +23,30 @@
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen">
 	<!-- Header with Hamburger Menu -->
+	<!-- Header with Hamburger Menu & Translate -->
 	<header class="bg-white shadow-sm">
-		<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-			<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
+		<div class="max-w-7xl mx-auto px-4 py-4">
+			<!-- Desktop Header -->
+			<div class="flex justify-between items-center">
+				<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
 
-			<button id="menuBtn" onclick="toggleMenu()"
-				class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
-				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16">
-					</path>
-				</svg>
-			</button>
+				<div class="flex items-center gap-3">
+					<!-- Google Translate Widget -->
+					<div id="google_translate_element"></div>
+
+					<!-- Hamburger Menu Button -->
+					<button id="menuBtn" onclick="toggleMenu()"
+						class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
+						<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+								d="M4 6h16M4 12h16M4 18h16"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
 		</div>
 
+		<!-- Dropdown Menu -->
 		<div id="mobileMenu"
 			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
 			<nav class="py-2">
@@ -47,7 +58,8 @@
 					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
 					Make Your Own
 				</a>
-				<a href="/ai-recipe" class="block px-6 py-3 text-pink-dark font-semibold bg-pink-light">
+				<a href="/ai-recipe"
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
 					AI Recipe Builder
 				</a>
 				<a href="/recipes"
@@ -62,6 +74,83 @@
 			</nav>
 		</div>
 	</header>
+
+	<!-- Google Translate Script -->
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement(
+				{
+					pageLanguage: 'en',
+					includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
+					layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+					autoDisplay: false
+				},
+				'google_translate_element'
+			);
+		}
+	</script>
+	<script type="text/javascript"
+		src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+	<!-- Custom Styling -->
+	<style>
+		/* Google Translate Widget Styling */
+		#google_translate_element {
+			display: inline-block;
+		}
+
+		/* Hide Google's annoying top banner */
+		.goog-te-banner-frame.skiptranslate {
+			display: none !important;
+		}
+
+		/* Remove body top margin added by Google Translate */
+		body {
+			top: 0px !important;
+		}
+
+		/* Style the language dropdown to match pink theme */
+		.goog-te-combo {
+			padding: 8px 12px;
+			border: 2px solid #FFB3C1;
+			border-radius: 8px;
+			background-color: white;
+			color: #FF8FA3;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			outline: none;
+			transition: all 0.2s;
+		}
+
+		.goog-te-combo:hover {
+			border-color: #FF8FA3;
+			background-color: #FFE4E9;
+		}
+
+		.goog-te-combo:focus {
+			border-color: #FF8FA3;
+			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
+		}
+
+		/* Mobile responsive */
+		@media (max-width: 640px) {
+			.max-w-7xl>.flex {
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+
+			#google_translate_element {
+				order: 3;
+				width: 100%;
+				margin-top: 8px;
+			}
+
+			.goog-te-combo {
+				width: 100%;
+			}
+		}
+	</style>
 
 	<!-- Main Content -->
 	<main class="max-w-4xl mx-auto px-4 py-8">

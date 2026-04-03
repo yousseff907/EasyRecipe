@@ -1,81 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - EasyRecipe</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'pink-light': '#FFE4E9',
-                        'pink-medium': '#FFB3C1',
-                        'pink-dark': '#FF8FA3',
-                    }
-                }
-            }
-        }
-    </script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login - EasyRecipe</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						'pink-light': '#FFE4E9',
+						'pink-medium': '#FFB3C1',
+						'pink-dark': '#FF8FA3',
+					}
+				}
+			}
+		}
+	</script>
 </head>
-<body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-pink-dark mb-2">EasyRecipe</h1>
-            <p class="text-gray-600">Sign in to your account</p>
-        </div>
 
-        <!-- Email Form (Step 1) -->
-        <div id="emailForm" class="space-y-4">
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition"
-                    placeholder="you@example.com"
-                >
-            </div>
-            <button 
-                onclick="requestCode()" 
-                class="w-full bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
-            >
-                Send Verification Code
-            </button>
-        </div>
+<body class="bg-gradient-to-br from-pink-light to-white min-h-screen">
+	<!-- Header with Translate (Outside everything) -->
+	<header class="bg-white shadow-sm">
+		<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+			<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
 
-        <!-- Code Form (Step 2) - Hidden initially -->
-        <div id="codeForm" class="space-y-4 hidden">
-            <div>
-                <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
-                <input 
-                    type="text" 
-                    id="code" 
-                    maxlength="6"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition text-center text-2xl tracking-widest"
-                    placeholder="000000"
-                >
-            </div>
-            <button 
-                onclick="verifyCode()" 
-                class="w-full bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
-            >
-                Verify Code
-            </button>
-            <button 
-                onclick="backToEmail()" 
-                class="w-full text-pink-dark hover:text-pink-medium font-medium transition"
-            >
-                ← Back to email
-            </button>
-        </div>
+			<!-- Google Translate Widget -->
+			<div id="google_translate_element"></div>
+		</div>
+	</header>
 
-        <!-- Message Display -->
-        <div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
-    </div>
+	<!-- Main Content -->
+	<div class="flex items-center justify-center p-4 py-12">
+		<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+			<!-- Header Inside Card -->
+			<div class="text-center mb-8">
+				<h2 class="text-3xl font-bold text-pink-dark mb-2">Welcome Back</h2>
+				<p class="text-gray-600">Sign in to your account</p>
+			</div>
 
-    <script src="/js/login.js"></script>
+			<!-- Email Form (Step 1) -->
+			<div id="emailForm" class="space-y-4">
+				<div>
+					<label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+					<input type="email" id="email"
+						class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition"
+						placeholder="you@example.com">
+				</div>
+				<button onclick="requestCode()"
+					class="w-full bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+					Send Verification Code
+				</button>
+			</div>
+
+			<!-- Code Form (Step 2) - Hidden initially -->
+			<div id="codeForm" class="space-y-4 hidden">
+				<div>
+					<label for="code" class="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+					<input type="text" id="code" maxlength="6"
+						class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition text-center text-2xl tracking-widest"
+						placeholder="000000">
+				</div>
+				<button onclick="verifyCode()"
+					class="w-full bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+					Verify Code
+				</button>
+				<button onclick="backToEmail()"
+					class="w-full text-pink-dark hover:text-pink-medium font-medium transition">
+					← Back to email
+				</button>
+			</div>
+
+			<!-- Message Display -->
+			<div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
+		</div>
+	</div>
+
+	<!-- Google Translate Script -->
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement(
+				{
+					pageLanguage: 'en',
+					includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
+					layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+					autoDisplay: false
+				},
+				'google_translate_element'
+			);
+		}
+	</script>
+	<script type="text/javascript"
+		src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+	<!-- Custom Styling -->
+	<style>
+		#google_translate_element {
+			display: inline-block;
+		}
+
+		.goog-te-banner-frame.skiptranslate {
+			display: none !important;
+		}
+
+		body {
+			top: 0px !important;
+		}
+
+		.goog-te-combo {
+			padding: 8px 12px;
+			border: 2px solid #FFB3C1;
+			border-radius: 8px;
+			background-color: white;
+			color: #FF8FA3;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			outline: none;
+			transition: all 0.2s;
+		}
+
+		.goog-te-combo:hover {
+			border-color: #FF8FA3;
+			background-color: #FFE4E9;
+		}
+
+		.goog-te-combo:focus {
+			border-color: #FF8FA3;
+			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
+		}
+	</style>
+
+	<script src="/js/login.js"></script>
 </body>
+
 </html>
