@@ -14,7 +14,7 @@ from services.auth_service import create_authentificator
 from utils import jwt_helper
 import json
 from utils.auth import get_current_user
-
+from services.moderation_service import moderate_content
 from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
 
 def	delete_file(path: str):
@@ -65,6 +65,13 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 
 		if recipe_dictionary == None:
 			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
+
+		unsafe_content = moderate_content(title=recipe_dictionary.get("title"),
+										ingredients = recipe_dictionary.get("ingredients", []),
+										steps = recipe_dictionary.get("steps", []))
+		if unsafe_content == True:
+			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
+								f"Please review and remove inappropriate content"))
 
 		recipe = Recipe(user_id = current_user.id,
 						video_url = url,
@@ -182,11 +189,11 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 
 @app.delete("/api/recipes/{id}")
 def delete_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
-	if recipe.user_id != current_user.id:
-		raise HTTPException(status_code=403, detail="You do not have permissions")
+	recipe = db.query(Recipe).filter(Recipe.id == id).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
+	if recipe.user_id != current_user.id:
+		raise HTTPException(status_code=403, detail="You do not have permissions")
 	db.delete(recipe)
 	db.commit()
 	return {"message": "Recipe deleted successfully"}
@@ -211,6 +218,12 @@ class SelfMadeRecipe(BaseModel):
 @app.post("/api/make_your_own")
 def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	try:
+		unsafe_content = moderate_content(title=self_made.title,
+										ingredients = self_made.ingredients,
+										steps = self_made.steps)
+		if unsafe_content == True:
+			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
+								f"Please review and remove inappropriate content"))
 		recipe = Recipe(user_id = current_user.id,
 						video_url = "",
 						title = self_made.title,
@@ -242,6 +255,13 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 		if recipe_dictionary == None:
 			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
 
+		unsafe_content = moderate_content(title=recipe_dictionary.get("title"),
+										ingredients = recipe_dictionary.get("ingredients", []),
+										steps = recipe_dictionary.get("steps", []))
+		if unsafe_content == True:
+			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
+								f"Please review and remove inappropriate content"))
+
 		recipe = Recipe(user_id = current_user.id,
 						video_url = "",
 						title = recipe_dictionary.get("title"),
@@ -272,6 +292,11 @@ class Feedback(BaseModel):
 @app.delete("/api/delete_account")
 def delete_account(request : Feedback, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	try:
+		unsafe_feedback = moderate_content(addon=request.feedback)
+		if unsafe_feedback == True:
+			raise HTTPException(status_code=400, detail=(f"Feedback content violates our community guidelines. "
+								f"Please review and remove inappropriate content"))
+
 		with open("feedback.txt", '+a') as f:
 			f.write(request.feedback+'\n')
 		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
@@ -287,6 +312,10 @@ class String(BaseModel):
 
 @app.post("/api/change_username")
 def change_username(request : String, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	unsafe_username = moderate_content(addon=request.string)
+	if unsafe_username == True:
+		raise HTTPException(status_code=400, detail=(f"Username content violates our community guidelines. "
+										f"Please review and remove inappropriate content"))
 	existing = db.query(User).filter(User.username == request.string).first()
 	if existing:
 		raise HTTPException(status_code=400, detail="Username already taken")
