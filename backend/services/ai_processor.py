@@ -70,6 +70,9 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 		- Format title as: "Recipe Name by @CreatorName"
 		- If creator not found, just use recipe name
 		- If information is missing, use reasonable defaults
+
+		CRITICAL: If the video/text is NOT about cooking/recipes OR contains inappropriate content,
+		respond with EXACTLY this text: NOT_A_RECIPE
 		"""
 
 		contents = [prompt]
@@ -87,6 +90,9 @@ def analyze_with_ai(transcript: str, caption: str, video_path=None, instructions
 			contents.append(video_file)
 			response = client.models.generate_content(model='gemini-3.1-flash-lite-preview', contents=contents)
 			text = response.text.strip()
+
+			if text == "NOT_A_RECIPE" or "NOT_A_RECIPE" in text:
+				return None
 
 			text = re.sub(r'^```json\s*', '', text)
 			text = re.sub(r'\s*```$', '', text)
@@ -140,11 +146,17 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 		- If units aren't clear from transcript, estimate based on typical recipes
 		- nutrition values are per serving in grams
 		- All numbers should be integers (no decimals)
+
+		CRITICAL: If the text is NOT about cooking/recipes OR contains inappropriate content,
+		respond with EXACTLY this text: NOT_A_RECIPE
 		"""
 		contents = [prompt]
 
 		response = client.models.generate_content(model='gemini-3.1-flash-lite-preview', contents=contents)
 		text = response.text.strip()
+
+		if text == "NOT_A_RECIPE" or "NOT_A_RECIPE" in text:
+			return None
 
 		text = re.sub(r'^```json\s*', '', text)
 		text = re.sub(r'\s*```$', '', text)
