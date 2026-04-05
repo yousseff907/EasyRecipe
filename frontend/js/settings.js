@@ -107,3 +107,36 @@ async function deleteAccount(feedback) {
 		showMessage('Error deleting account. Please try again.', true);
 	}
 }
+
+// Fetch and display current username
+async function loadCurrentUsername() {
+	const token = localStorage.getItem('token');
+	if (!token) {
+		window.location.href = '/';
+		return;
+	}
+
+	try {
+		const response = await fetch('/api/user/me', {
+			headers: {
+				'Authorization': `Bearer ${token}`
+			}
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			document.getElementById('currentUsername').textContent = data.username || data.email;
+		} else {
+			document.getElementById('currentUsername').textContent = 'Unknown';
+		}
+	} catch (error) {
+		console.error('Error loading username:', error);
+		document.getElementById('currentUsername').textContent = 'Error loading';
+	}
+}
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', () => {
+	checkAuth();
+	loadCurrentUsername();
+});
