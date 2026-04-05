@@ -25,17 +25,6 @@ async function loadCurrentUsername() {
 	}
 }
 
-// Call on page load
-window.addEventListener('DOMContentLoaded', () => {
-	checkAuth();
-	loadCurrentUsername();
-});
-
-// Check authentication
-window.addEventListener('DOMContentLoaded', () => {
-	checkAuth();
-});
-
 // Function: Change Username
 async function changeUsername() {
 	const newUsername = document.getElementById('newUsername').value.trim();
@@ -50,14 +39,14 @@ async function changeUsername() {
 		return;
 	}
 
-	if (newUsername.length > 50) {
-		showMessage('Username must be less than 50 characters', true);
+	if (newUsername.length > 30) {
+		showMessage('Username must be less than 30 characters', true);
 		return;
 	}
 
 	try {
-		const token = localStorage.getItem('auth_token');
-		const response = await fetch(`${API_URL}/api/change_username`, {
+		const token = localStorage.getItem('token');  // FIXED: was 'auth_token'
+		const response = await fetch('/api/change_username', {  // FIXED: removed API_URL
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -67,8 +56,8 @@ async function changeUsername() {
 		});
 
 		if (response.status === 401) {
-			localStorage.removeItem('auth_token');
-			window.location.href = '/login';
+			localStorage.removeItem('token');
+			window.location.href = '/';
 			return;
 		}
 
@@ -77,6 +66,8 @@ async function changeUsername() {
 		if (response.ok) {
 			showMessage('Username updated successfully!', false);
 			document.getElementById('newUsername').value = '';
+			// Reload username display
+			loadCurrentUsername();
 		} else {
 			showMessage(data.detail || 'Failed to update username', true);
 		}
@@ -118,8 +109,8 @@ function confirmDelete() {
 // Function: Delete Account
 async function deleteAccount(feedback) {
 	try {
-		const token = localStorage.getItem('auth_token');
-		const response = await fetch(`${API_URL}/api/delete_account`, {
+		const token = localStorage.getItem('token');  // FIXED: was 'auth_token'
+		const response = await fetch('/api/delete_account', {  // FIXED: removed API_URL
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -129,9 +120,9 @@ async function deleteAccount(feedback) {
 		});
 
 		if (response.ok) {
-			localStorage.removeItem('auth_token');
+			localStorage.removeItem('token');
 			alert('Your account has been deleted. We\'re sorry to see you go!');
-			window.location.href = '/login';
+			window.location.href = '/';
 		} else {
 			const data = await response.json();
 			showMessage(data.detail || 'Failed to delete account', true);
@@ -140,3 +131,21 @@ async function deleteAccount(feedback) {
 		showMessage('Error deleting account. Please try again.', true);
 	}
 }
+
+// Show message helper
+function showMessage(text, isError) {
+	const messageDiv = document.getElementById('message');
+	messageDiv.textContent = text;
+	messageDiv.className = `mt-6 p-4 rounded-lg ${isError ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+	messageDiv.classList.remove('hidden');
+
+	setTimeout(() => {
+		messageDiv.classList.add('hidden');
+	}, 5000);
+}
+
+// Initialize on page load - SINGLE listener
+window.addEventListener('DOMContentLoaded', () => {
+	checkAuth();
+	loadCurrentUsername();
+});

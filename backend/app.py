@@ -322,3 +322,11 @@ def change_username(request : String, current_user : User = Depends(get_current_
 	current_user.username = request.string
 	db.commit()
 	db.refresh(current_user)
+
+@app.get("/api/user/me")
+def get_current_user_info(current_user: User = Depends(get_current_user)):
+	return {
+		"id": current_user.id,
+		"email": current_user.email,
+		"username": current_user.username
+	}
