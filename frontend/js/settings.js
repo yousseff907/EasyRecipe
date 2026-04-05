@@ -1,14 +1,35 @@
+// Fetch and display current username
+async function loadCurrentUsername() {
+	const token = localStorage.getItem('token');
+	if (!token) return;
+
+	try {
+		const response = await fetch('/api/user/me', {
+			headers: {
+				'Authorization': `Bearer ${token}`
+			}
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			const usernameSpan = document.getElementById('currentUsername');
+			if (usernameSpan) {
+				usernameSpan.textContent = data.username || data.email;
+			}
+		}
+	} catch (error) {
+		console.error('Error loading username:', error);
+	}
+}
+
+// Function: Change Username
+
 // Function: Change Username
 async function changeUsername() {
 	const newUsername = document.getElementById('newUsername').value.trim();
 
 	if (!newUsername) {
 		showMessage('Please enter a new username', true);
-		return;
-	}
-
-	if (newUsername.length < 3) {
-		showMessage('Username must be at least 3 characters', true);
 		return;
 	}
 
@@ -120,4 +141,5 @@ function showMessage(text, isError) {
 // Initialize on page load - SINGLE listener
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
+	loadCurrentUsername();
 });
