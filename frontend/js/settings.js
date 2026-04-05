@@ -1,6 +1,6 @@
 // Fetch and display current username
 async function loadCurrentUsername() {
-	const token = localStorage.getItem('token');
+	const token = localStorage.getItem('auth_token');
 	if (!token) return;
 
 	try {
@@ -39,7 +39,7 @@ async function changeUsername() {
 	}
 
 	try {
-		const token = localStorage.getItem('token');  // FIXED: was 'auth_token'
+		const token = localStorage.getItem('auth_token');  // FIXED: was 'auth_token'
 		const response = await fetch('/api/change_username', {  // FIXED: removed API_URL
 			method: 'POST',
 			headers: {
@@ -50,7 +50,7 @@ async function changeUsername() {
 		});
 
 		if (response.status === 401) {
-			localStorage.removeItem('token');
+			localStorage.removeItem('auth_token');
 			window.location.href = '/';
 			return;
 		}
@@ -103,7 +103,7 @@ function confirmDelete() {
 // Function: Delete Account
 async function deleteAccount(feedback) {
 	try {
-		const token = localStorage.getItem('token');  // FIXED: was 'auth_token'
+		const token = localStorage.getItem('auth_token');  // FIXED: was 'auth_token'
 		const response = await fetch('/api/delete_account', {  // FIXED: removed API_URL
 			method: 'DELETE',
 			headers: {
@@ -114,7 +114,7 @@ async function deleteAccount(feedback) {
 		});
 
 		if (response.ok) {
-			localStorage.removeItem('token');
+			localStorage.removeItem('auth_token');
 			alert('Your account has been deleted. We\'re sorry to see you go!');
 			window.location.href = '/';
 		} else {
