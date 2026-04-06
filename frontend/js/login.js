@@ -12,33 +12,39 @@ const API_URL = '';
 // Function 1: Request verification code
 function requestCode() {
     const email = document.getElementById('email').value;
-    
-    // Validate email
+    const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+	const turnstileToken = turnstileInput ? turnstileInput.value : null;
+
     if (!email) {
         showMessage('Please enter your email', true);
         return;
     }
-    
-    // Call backend
+
+    if (!turnstileToken) {
+        showMessage('Please complete the CAPTCHA', true);
+        return;
+    }
+
     fetch(`${API_URL}/api/auth/request-code`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email: email })
+        body: JSON.stringify({ email: email, turnstile_token: turnstileToken })
     })
     .then(response => response.json())
     .then(data => {
         if (data.message) {
             showMessage('Verification code sent to your email!', false);
-            // Show code form
             document.getElementById('emailForm').classList.add('hidden');
             document.getElementById('codeForm').classList.remove('hidden');
         } else {
+            turnstile.reset();
             showMessage(data.detail || 'Failed to send code', true);
         }
     })
     .catch(error => {
+        turnstile.reset();
         showMessage('Network error. Make sure backend is running.', true);
     });
 }

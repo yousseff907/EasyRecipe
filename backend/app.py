@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from services.video_audio_downloader import *
@@ -16,6 +16,8 @@ import json
 from utils.auth import get_current_user
 from services.moderation_service import moderate_content
 from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
+import httpx
+from config import TURNSTILE_SECRET_KEY
 
 def	delete_file(path: str):
 	try:
@@ -36,9 +38,6 @@ app.add_middleware(
 class VideoRequest(BaseModel):
 	url: str
 	instructions: str = Field(default="", max_length=300)
-
-class LoginRequest(BaseModel):
-	email: str
 
 class VerificationCode(BaseModel):
 	otp: str
@@ -116,10 +115,27 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
+
+class LoginRequest(BaseModel):
+	email: str
+	turnstile_token : str
+
 @app.post("/api/auth/request-code")
-def	login(request: LoginRequest, db = Depends(get_db)):
+async def	login(body: LoginRequest, request : Request, db = Depends(get_db)):
+	user_ip = request.headers.get("CF-Connecting-IP")
+	async with httpx.AsyncClient() as client:
+		response = await client.post(
+					'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+					data={'secret' : TURNSTILE_SECRET_KEY,
+					'response' : body.turnstile_token,
+					'remoteip' : user_ip
+						}
+					)
+	result = response.json()
+	if not result.get('success'):
+		raise HTTPException(status_code=400, detail="CAPTCHA verification failed")
 	try:
-		email = request.email
+		email = body.email
 		code = str(secrets.randbelow(1000000)).zfill(6)
 		verification = create_authentificator(db, code, email)
 		send_email(email, code)
