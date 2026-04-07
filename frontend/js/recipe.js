@@ -124,11 +124,11 @@ function displayRecipe(recipe) {
 function updatePrivacyBtn(isPublic) {
 	const btn = document.getElementById('privacyBtn');
 	if (isPublic) {
-		btn.textContent = '🔓 Public — Make Private';
+		btn.textContent = 'Public — Make Private';
 		btn.classList.remove('border-pink-dark', 'text-pink-dark', 'hover:bg-pink-light');
 		btn.classList.add('border-gray-400', 'text-gray-600', 'hover:bg-gray-100');
 	} else {
-		btn.textContent = '🔒 Private — Make Public';
+		btn.textContent = 'Private — Make Public';
 		btn.classList.remove('border-gray-400', 'text-gray-600', 'hover:bg-gray-100');
 		btn.classList.add('border-pink-dark', 'text-pink-dark', 'hover:bg-pink-light');
 	}
@@ -138,10 +138,10 @@ function updatePrivacyBtn(isPublic) {
 function updateFavoriteBtn(isFavorited) {
 	const btn = document.getElementById('favoriteBtn');
 	if (isFavorited) {
-		btn.innerHTML = '❤️ Saved';
+		btn.innerHTML = 'Saved';
 		btn.className = 'px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark bg-pink-dark text-white hover:bg-pink-medium';
 	} else {
-		btn.innerHTML = '🤍 Save Recipe';
+		btn.innerHTML = 'Save Recipe';
 		btn.className = 'px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light';
 	}
 }
