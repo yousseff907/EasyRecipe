@@ -139,12 +139,12 @@
 			</div>
 
 			<!-- Search Bar -->
-			<div class="flex gap-3 mb-8">
+			<div class="flex gap-2 mb-8">
 				<input type="text" id="searchInput" placeholder="Search..."
-					class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition"
+					class="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-medium focus:border-transparent outline-none transition"
 					onkeydown="if(event.key === 'Enter') doSearch()">
 				<button onclick="doSearch()"
-					class="bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-3 rounded-lg transition shadow-md hover:shadow-lg">
+					class="flex-shrink-0 bg-pink-dark hover:bg-pink-medium text-white font-semibold px-4 py-3 rounded-lg transition shadow-md hover:shadow-lg">
 					Search
 				</button>
 			</div>

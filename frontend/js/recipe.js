@@ -118,6 +118,14 @@ function displayRecipe(recipe) {
 
 	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
+	// Back button
+	const backBtn = document.querySelector('a[href="/recipes"]');
+	if (backBtn && document.referrer.includes('/user/')) {
+		backBtn.href = document.referrer;
+		backBtn.textContent = '← Back to Profile';
+	} else if (backBtn) {
+		backBtn.textContent = '← Back to Recipes';
+	}
 }
 
 // Helper: Update privacy button text and style (never touches hidden class)
