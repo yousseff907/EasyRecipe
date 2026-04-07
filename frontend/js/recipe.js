@@ -4,16 +4,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	const urlParams = new URLSearchParams(window.location.search);
 	const recipeId = urlParams.get('id');
+	const username = urlParams.get('username');
 
 	if (!recipeId) {
 		window.location.href = '/recipes';
 		return;
 	}
 
-	loadRecipe(recipeId);
+	if (username) {
+		loadRecipeFromProfile(recipeId, username);
+	} else {
+		loadRecipe(recipeId);
+	}
 });
 
-// Function: Load single recipe
+// Function: Load single recipe (own or public)
 function loadRecipe(recipeId) {
 	const token = localStorage.getItem('auth_token');
 
@@ -21,6 +26,38 @@ function loadRecipe(recipeId) {
 	document.getElementById('recipeContent').classList.add('hidden');
 
 	fetch(`${API_URL}/api/recipes/${recipeId}`, {
+		method: 'GET',
+		headers: { 'Authorization': `Bearer ${token}` }
+	})
+		.then(response => {
+			if (response.status === 401) {
+				localStorage.removeItem('auth_token');
+				window.location.href = '/login';
+				return;
+			}
+			if (response.status === 404) {
+				showMessage('Recipe not found', true);
+				return;
+			}
+			return response.json();
+		})
+		.then(data => {
+			if (data) displayRecipe(data);
+		})
+		.catch(() => {
+			document.getElementById('loading').classList.add('hidden');
+			showMessage('Failed to load recipe', true);
+		});
+}
+
+// Function: Load recipe from someone's profile
+function loadRecipeFromProfile(recipeId, username) {
+	const token = localStorage.getItem('auth_token');
+
+	document.getElementById('loading').classList.remove('hidden');
+	document.getElementById('recipeContent').classList.add('hidden');
+
+	fetch(`${API_URL}/api/user/${username}/recipes/${recipeId}`, {
 		method: 'GET',
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
@@ -119,15 +156,14 @@ function displayRecipe(recipe) {
 	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
 
-	const from = sessionStorage.getItem('from');
-	const username = sessionStorage.getItem('profileUsername');
+	// Back button
+	const urlParams = new URLSearchParams(window.location.search);
+	const username = urlParams.get('username');
 	const backBtn = document.querySelector('a[href="/recipes"]');
 
-	if (backBtn && from === 'profile' && username) {
+	if (backBtn && username) {
 		backBtn.href = `/user/${username}`;
 		backBtn.textContent = '← Back to Profile';
-		sessionStorage.removeItem('from');
-		sessionStorage.removeItem('profileUsername');
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}

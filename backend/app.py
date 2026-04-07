@@ -481,3 +481,26 @@ def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = De
 	for r in recipes:
 		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
 	return {"recipes" : recipe_list}
+
+@app.get("/api/user/{username}/recipes/{recipe_id}")
+def get_user_recipe(username : str, recipe_id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == recipe_id).first() is not None
+	return {
+		"id": recipe.id,
+		"title": recipe.title,
+		"ingredients": json.loads(recipe.ingredients),
+		"steps": json.loads(recipe.steps),
+		"prep_time": recipe.prep_time,
+		"cook_time": recipe.cook_time,
+		"servings": recipe.servings,
+		"nutrition_per_serving": json.loads(recipe.nutrition) if recipe.nutrition else None,
+		"video_url": recipe.video_url,
+		"created_at": recipe.created_at,
+		"is_public" : recipe.is_public,
+		"owner_id" : recipe.user_id,
+		"current_user_id" : current_user.id,
+		"is_favorited" : is_favorited
+		}
