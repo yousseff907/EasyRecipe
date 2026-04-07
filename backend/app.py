@@ -182,14 +182,22 @@ def get_recipes(current_user : User = Depends(get_current_user), db = Depends(ge
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	recipe_list = []
 	for r in recipe:
-		recipe_list.append({"id" : r.id, "title" : r.title})
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+	return {"recipes" : recipe_list}
+
+@app.get("/api/recipes/favorites")
+def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	recipe_list = []
+	for r in current_user.favorites.all():
+		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/{id}")
-def get_single_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
+def get_single_recipe(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	recipe = db.query(Recipe).filter(Recipe.id == id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
+	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first() is not None
 	return {
 		"id": recipe.id,
 		"title": recipe.title,
@@ -200,7 +208,11 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 		"servings": recipe.servings,
 		"nutrition_per_serving": json.loads(recipe.nutrition) if recipe.nutrition else None,
 		"video_url": recipe.video_url,
-		"created_at": recipe.created_at
+		"created_at": recipe.created_at,
+		"is_public" : recipe.is_public,
+		"owner_id" : recipe.user_id,
+		"current_user_id" : current_user.id,
+		"is_favorited" : is_favorited
 		}
 
 @app.delete("/api/recipes/{id}")
@@ -346,3 +358,46 @@ def change_username(request : String, current_user : User = Depends(get_current_
 	current_user.username = request.string
 	db.commit()
 	db.refresh(current_user)
+
+@app.post("/api/change_bio")
+def change_bio(request : String, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	unsafe_bio = moderate_content(addon=request.string)
+	if unsafe_bio == True:
+		raise HTTPException(status_code=400, detail=(f"Bio content violates our community guidelines. "
+										f"Please review and remove inappropriate content"))
+	current_user.bio = request.string
+	db.commit()
+	db.refresh(current_user)
+
+@app.patch("/api/recipes/{id}")
+def change_recipe_status(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	recipe = db.query(Recipe).filter(Recipe.id == id, current_user.id == Recipe.user_id).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	recipe.is_public = not recipe.is_public
+	db.commit()
+	db.refresh(recipe)
+	return {"is_public" : recipe.is_public}
+
+@app.post("/api/recipes/{id}/favorite")
+def save_recipe_as_favorite(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	existing = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first()
+	if existing:
+		raise HTTPException(status_code=400, detail="Recipe already saved")
+	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	user_favorite = UserFavorites(user_id = current_user.id, recipe_id = id)
+	db.add(user_favorite)
+	db.commit()
+	db.refresh(user_favorite)
+	return {"status": "success", "saved_at" : user_favorite.saved_at}
+
+@app.delete("/api/recipes/{id}/favorite")
+def unsave_recipe_from_favorite(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	user_favorite = db.query(UserFavorites).filter(UserFavorites.recipe_id == id, UserFavorites.user_id == current_user.id).first()
+	if user_favorite is None:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+	db.delete(user_favorite)
+	db.commit()
+	return {"message" : "Recipe removed from favorites"}

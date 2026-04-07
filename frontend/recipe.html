@@ -25,22 +25,14 @@
 	</script>
 </head>
 
-<!-- AFTER (correct) -->
-
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
-	<!-- Header with Hamburger Menu -->
 	<!-- Header with Hamburger Menu & Translate -->
 	<header class="bg-white shadow-sm">
 		<div class="w-full px-4 py-4">
-			<!-- Desktop Header -->
 			<div class="flex justify-between items-center">
 				<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
-
 				<div class="flex items-center gap-3">
-					<!-- Google Translate Widget -->
 					<div id="google_translate_element"></div>
-
-					<!-- Hamburger Menu Button -->
 					<button id="menuBtn" onclick="toggleMenu()"
 						class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
 						<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,30 +49,20 @@
 			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
 			<nav class="py-2">
 				<a href="/extract"
-					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
-					Extract from Video
-				</a>
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Extract from Video</a>
 				<a href="/make-your-own"
-					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
-					Make Your Own
-				</a>
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Make Your Own</a>
 				<a href="/ai-recipe"
-					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
-					AI Recipe Builder
-				</a>
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">AI Recipe Builder</a>
 				<a href="/recipes"
-					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
-					My Recipes
-				</a>
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">My Recipes</a>
+				<a href="/favorites"
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">My Favorites</a>
 				<a href="/settings"
-					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">
-					Settings
-				</a>
+					class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Settings</a>
 				<hr class="my-2 border-pink-light">
 				<button onclick="logout()"
-					class="block w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition">
-					Logout
-				</button>
+					class="block w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition">Logout</button>
 			</nav>
 		</div>
 	</header>
@@ -88,38 +70,21 @@
 	<!-- Google Translate Script -->
 	<script type="text/javascript">
 		function googleTranslateElementInit() {
-			new google.translate.TranslateElement(
-				{
-					pageLanguage: 'en',
-					includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
-					layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-					autoDisplay: false
-				},
-				'google_translate_element'
-			);
+			new google.translate.TranslateElement({
+				pageLanguage: 'en',
+				includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
+				layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+				autoDisplay: false
+			}, 'google_translate_element');
 		}
 	</script>
 	<script type="text/javascript"
 		src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-	<!-- Custom Styling -->
 	<style>
-		/* Google Translate Widget Styling */
-		#google_translate_element {
-			display: inline-block;
-		}
-
-		/* Hide Google's annoying top banner */
-		.goog-te-banner-frame.skiptranslate {
-			display: none !important;
-		}
-
-		/* Remove body top margin added by Google Translate */
-		body {
-			top: 0px !important;
-		}
-
-		/* Style the language dropdown to match pink theme */
+		#google_translate_element { display: inline-block; }
+		.goog-te-banner-frame.skiptranslate { display: none !important; }
+		body { top: 0px !important; }
 		.goog-te-combo {
 			padding: 8px 12px;
 			border: 2px solid #FFB3C1;
@@ -132,34 +97,8 @@
 			outline: none;
 			transition: all 0.2s;
 		}
-
-		.goog-te-combo:hover {
-			border-color: #FF8FA3;
-			background-color: #FFE4E9;
-		}
-
-		.goog-te-combo:focus {
-			border-color: #FF8FA3;
-			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
-		}
-
-		/* Mobile responsive */
-		@media (max-width: 640px) {
-			.max-w-7xl>.flex {
-				flex-wrap: wrap;
-				gap: 8px;
-			}
-
-			#google_translate_element {
-				order: 3;
-				width: 100%;
-				margin-top: 8px;
-			}
-
-			.goog-te-combo {
-				width: 100%;
-			}
-		}
+		.goog-te-combo:hover { border-color: #FF8FA3; background-color: #FFE4E9; }
+		.goog-te-combo:focus { border-color: #FF8FA3; box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3); }
 	</style>
 
 	<!-- Main Content -->
@@ -198,23 +137,35 @@
 						<p class="text-sm text-gray-600 mb-1">Servings</p>
 						<p id="servings" class="text-xl font-semibold text-pink-dark">-</p>
 					</div>
-					<!-- NEW: Serving Size -->
 					<div class="text-center p-4 bg-pink-light rounded-lg">
 						<p class="text-sm text-gray-600 mb-1">Serving Size</p>
 						<p id="servingSize" class="text-xl font-semibold text-pink-dark">-</p>
 					</div>
-
 				</div>
 
 				<!-- Action Buttons -->
-				<div class="flex gap-4 mb-8">
-					<button onclick="downloadVideo()"
-						class="flex-1 bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+				<div class="flex flex-wrap gap-3 mb-8">
+					<!-- Download — owner only -->
+					<button id="downloadBtn" onclick="downloadVideo()"
+						class="hidden flex-1 bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
 						Download Video
 					</button>
-					<button onclick="deleteRecipe()"
-						class="px-6 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+
+					<!-- Public/Private Toggle — owner only -->
+					<button id="privacyBtn" onclick="togglePrivacy()"
+						class="hidden flex-1 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg border-2">
+					</button>
+
+					<!-- Delete — owner only -->
+					<button id="deleteBtn" onclick="deleteRecipe()"
+						class="hidden px-6 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
 						Delete
+					</button>
+
+					<!-- Favorite — everyone -->
+					<button id="favoriteBtn" onclick="toggleFavorite()"
+						class="px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light">
+						<!-- icon and text set by JS -->
 					</button>
 				</div>
 
@@ -229,42 +180,33 @@
 					<h3 class="text-2xl font-bold text-gray-800 mb-4">Instructions</h3>
 					<ol id="stepsList" class="space-y-4"></ol>
 				</div>
-				<!-- ← ADD THIS: Nutritional Facts Toggle Button -->
+
+				<!-- Nutrition -->
 				<div class="mt-6">
 					<button onclick="toggleNutrition()" id="nutritionBtn"
 						class="w-full bg-white border-2 border-pink-dark text-pink-dark px-4 py-3 rounded-lg hover:bg-pink-light transition font-semibold">
 						Show Nutritional Facts
 					</button>
 				</div>
-
-				<!-- ← ADD THIS: Nutrition Panel (Hidden by default) -->
 				<div id="nutritionPanel" class="hidden mt-4">
 					<div class="bg-gradient-to-r from-pink-light to-white p-6 rounded-lg border-2 border-pink-medium">
 						<h4 class="text-xl font-semibold text-gray-800 mb-2">
 							Nutritional Facts
 							<span class="text-sm text-gray-500 font-normal">(per serving, estimated)</span>
 						</h4>
-
 						<div class="grid grid-cols-2 gap-3 mt-4">
-							<!-- Calories -->
 							<div class="bg-white p-4 rounded-lg shadow-sm">
 								<p class="text-sm text-gray-600 mb-1">Calories</p>
 								<p id="nutritionCalories" class="text-2xl font-bold text-pink-dark">-</p>
 							</div>
-
-							<!-- Protein -->
 							<div class="bg-white p-4 rounded-lg shadow-sm">
 								<p class="text-sm text-gray-600 mb-1">Protein</p>
 								<p id="nutritionProtein" class="text-2xl font-bold text-pink-dark">-</p>
 							</div>
-
-							<!-- Carbs -->
 							<div class="bg-white p-4 rounded-lg shadow-sm">
 								<p class="text-sm text-gray-600 mb-1">Carbs</p>
 								<p id="nutritionCarbs" class="text-2xl font-bold text-pink-dark">-</p>
 							</div>
-
-							<!-- Fat -->
 							<div class="bg-white p-4 rounded-lg shadow-sm">
 								<p class="text-sm text-gray-600 mb-1">Fat</p>
 								<p id="nutritionFat" class="text-2xl font-bold text-pink-dark">-</p>
@@ -295,5 +237,4 @@
 	<script src="/js/utils.js"></script>
 	<script src="/js/recipe.js"></script>
 </body>
-
 </html>
