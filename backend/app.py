@@ -98,7 +98,7 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 @app.get("/api/recipes/{recipe_id}/download-video")
 def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user), db = Depends(get_db)):
 	video_path = None
-	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.id == recipe_id).first()
+	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True)).first()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	else:
@@ -384,7 +384,7 @@ def save_recipe_as_favorite(id : int, current_user : User = Depends(get_current_
 	existing = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first()
 	if existing:
 		raise HTTPException(status_code=400, detail="Recipe already saved")
-	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
+	recipe = db.query(Recipe).filter(Recipe.id == id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True)).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	user_favorite = UserFavorites(user_id = current_user.id, recipe_id = id)
