@@ -22,7 +22,37 @@ async function loadCurrentUsername() {
 	}
 }
 
-// Function: Change Username
+// Function: Change Bio
+async function changeBio() {
+    const newBio = document.getElementById('newBio').value.trim();
+
+    if (!newBio) {
+        showMessage('Please enter a bio', true);
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch('/api/change_bio', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ string: newBio })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showMessage('Bio updated successfully!', false);
+        } else {
+            showMessage(data.detail || 'Failed to update bio', true);
+        }
+    } catch (error) {
+        showMessage('Error updating bio. Please try again.', true);
+    }
+}
 
 // Function: Change Username
 async function changeUsername() {
