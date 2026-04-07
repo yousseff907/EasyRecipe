@@ -138,10 +138,10 @@ function updatePrivacyBtn(isPublic) {
 function updateFavoriteBtn(isFavorited) {
 	const btn = document.getElementById('favoriteBtn');
 	if (isFavorited) {
-		btn.innerHTML = 'Remove from Favorites';
+		btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-5-7 5V5z" /></svg> Saved`;
 		btn.className = 'px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark bg-pink-dark text-white hover:bg-pink-medium';
 	} else {
-		btn.innerHTML = 'Save to Favorites';
+		btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-5-7 5V5z" /></svg> Save`;
 		btn.className = 'px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light';
 	}
 }
