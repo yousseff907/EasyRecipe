@@ -5,53 +5,58 @@ async function loadCurrentUsername() {
 
 	try {
 		const response = await fetch('/api/user/me', {
-			headers: {
-				'Authorization': `Bearer ${token}`
-			}
+			headers: { 'Authorization': `Bearer ${token}` }
 		});
 
 		if (response.ok) {
 			const data = await response.json();
-			const usernameSpan = document.getElementById('currentUsername');
-			if (usernameSpan) {
-				usernameSpan.textContent = data.username || data.email;
+			document.getElementById('currentUsername').textContent = data.username || data.email;
+			document.getElementById('currentBio').textContent = data.bio || 'No bio yet.';
+			if (data.bio) {
+				document.getElementById('newBio').value = data.bio;
 			}
 		}
 	} catch (error) {
-		console.error('Error loading username:', error);
+		console.error('Error loading user info:', error);
 	}
 }
 
 // Function: Change Bio
 async function changeBio() {
-    const newBio = document.getElementById('newBio').value.trim();
+	const newBio = document.getElementById('newBio').value.trim();
 
-    if (!newBio) {
-        showMessage('Please enter a bio', true);
-        return;
-    }
+	if (!newBio) {
+		showMessage('Please enter a bio', true);
+		return;
+	}
 
-    try {
-        const token = localStorage.getItem('auth_token');
-        const response = await fetch('/api/change_bio', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ string: newBio })
-        });
+	if (newBio.length > 200) {
+		showMessage('Bio must be less than 200 characters', true);
+		return;
+	}
 
-        const data = await response.json();
+	try {
+		const token = localStorage.getItem('auth_token');
+		const response = await fetch('/api/change_bio', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
+			},
+			body: JSON.stringify({ string: newBio })
+		});
 
-        if (response.ok) {
-            showMessage('Bio updated successfully!', false);
-        } else {
-            showMessage(data.detail || 'Failed to update bio', true);
-        }
-    } catch (error) {
-        showMessage('Error updating bio. Please try again.', true);
-    }
+		const data = await response.json();
+
+		if (response.ok) {
+			showMessage('Bio updated successfully!', false);
+			document.getElementById('currentBio').textContent = newBio;
+		} else {
+			showMessage(data.detail || 'Failed to update bio', true);
+		}
+	} catch (error) {
+		showMessage('Error updating bio. Please try again.', true);
+	}
 }
 
 // Function: Change Username

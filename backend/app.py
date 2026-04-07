@@ -339,15 +339,16 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
 	return {
 		"id": current_user.id,
 		"email": current_user.email,
-		"username": current_user.username
+		"username": current_user.username,
+		"bio": current_user.bio
 	}
 
 
-class String(BaseModel):
-	string : str
+class Username(BaseModel):
+	string : str = Field(max_length=30)
 
 @app.post("/api/change_username")
-def change_username(request : String, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def change_username(request : Username, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	unsafe_username = moderate_content(addon=request.string)
 	if unsafe_username == True:
 		raise HTTPException(status_code=400, detail=(f"Username content violates our community guidelines. "
@@ -359,8 +360,12 @@ def change_username(request : String, current_user : User = Depends(get_current_
 	db.commit()
 	db.refresh(current_user)
 
+
+class Bio(BaseModel):
+	string : str = Field(max_length=200)
+
 @app.post("/api/change_bio")
-def change_bio(request : String, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def change_bio(request : Bio, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	unsafe_bio = moderate_content(addon=request.string)
 	if unsafe_bio == True:
 		raise HTTPException(status_code=400, detail=(f"Bio content violates our community guidelines. "
