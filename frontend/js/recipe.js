@@ -118,10 +118,15 @@ function displayRecipe(recipe) {
 
 	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
+
 	// Back button
+	const urlParams = new URLSearchParams(window.location.search);
+	const from = urlParams.get('from');
+	const username = urlParams.get('username');
 	const backBtn = document.querySelector('a[href="/recipes"]');
-	if (backBtn && document.referrer.includes('/user/')) {
-		backBtn.href = document.referrer;
+
+	if (backBtn && from === 'profile' && username) {
+		backBtn.href = `/user/${username}`;
 		backBtn.textContent = '← Back to Profile';
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
