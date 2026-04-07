@@ -315,7 +315,7 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 
 
 class Feedback(BaseModel):
-	feedback : str
+	feedback : str = Field(max_length=500)
 
 @app.delete("/api/delete_account")
 def delete_account(request : Feedback, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
