@@ -120,18 +120,17 @@ function displayRecipe(recipe) {
 	updateFavoriteBtn(recipe.is_favorited);
 }
 
-// Helper: Update privacy button text and style
+// Helper: Update privacy button text and style (never touches hidden class)
 function updatePrivacyBtn(isPublic) {
 	const btn = document.getElementById('privacyBtn');
 	if (isPublic) {
 		btn.textContent = '🔓 Public — Make Private';
-		btn.className = 'hidden flex-1 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg border-2 border-gray-400 text-gray-600 hover:bg-gray-100';
-		// Keep hidden if not owner — toggling visibility is handled by isOwner check
-		// We just update the classes, the hidden state is managed separately
-		btn.classList.remove('hidden');
+		btn.classList.remove('border-pink-dark', 'text-pink-dark', 'hover:bg-pink-light');
+		btn.classList.add('border-gray-400', 'text-gray-600', 'hover:bg-gray-100');
 	} else {
 		btn.textContent = '🔒 Private — Make Public';
-		btn.className = 'flex-1 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg border-2 border-pink-dark text-pink-dark hover:bg-pink-light';
+		btn.classList.remove('border-gray-400', 'text-gray-600', 'hover:bg-gray-100');
+		btn.classList.add('border-pink-dark', 'text-pink-dark', 'hover:bg-pink-light');
 	}
 }
 
