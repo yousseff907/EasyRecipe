@@ -119,15 +119,15 @@ function displayRecipe(recipe) {
 	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
 
-	// Back button
-	const urlParams = new URLSearchParams(window.location.search);
-	const from = urlParams.get('from');
-	const username = urlParams.get('username');
+	const from = sessionStorage.getItem('from');
+	const username = sessionStorage.getItem('profileUsername');
 	const backBtn = document.querySelector('a[href="/recipes"]');
 
 	if (backBtn && from === 'profile' && username) {
 		backBtn.href = `/user/${username}`;
 		backBtn.textContent = '← Back to Profile';
+		sessionStorage.removeItem('from');
+		sessionStorage.removeItem('profileUsername');
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}
