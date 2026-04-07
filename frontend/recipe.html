@@ -143,10 +143,10 @@
 			<!-- Recipe Content -->
 			<div id="recipeContent" class="hidden">
 				<!-- Title -->
-				<h2 id="recipeTitle" class="text-4xl font-bold text-gray-800 mb-6"></h2>
+				<h2 id="recipeTitle" class="text-2xl md:text-4xl font-bold text-gray-800 mb-6"></h2>
 
 				<!-- Recipe Info -->
-				<div class="grid grid-cols-4 gap-4 mb-8">
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 					<div class="text-center p-4 bg-pink-light rounded-lg">
 						<p class="text-sm text-gray-600 mb-1">Prep Time</p>
 						<p id="prepTime" class="text-xl font-semibold text-pink-dark">-</p>
@@ -167,27 +167,22 @@
 
 				<!-- Action Buttons -->
 				<div class="flex flex-wrap gap-3 mb-8">
-					<!-- Download — owner only -->
 					<button id="downloadBtn" onclick="downloadVideo()"
-						class="hidden flex-1 bg-pink-dark hover:bg-pink-medium text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+						class="hidden w-full sm:w-auto bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg">
 						Download Video
 					</button>
 
-					<!-- Public/Private Toggle — owner only -->
 					<button id="privacyBtn" onclick="togglePrivacy()"
-						class="hidden flex-1 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg border-2">
+						class="hidden w-full sm:w-auto font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg border-2">
 					</button>
 
-					<!-- Delete — owner only -->
 					<button id="deleteBtn" onclick="deleteRecipe()"
-						class="hidden px-6 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+						class="hidden w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg">
 						Delete
 					</button>
 
-					<!-- Favorite — everyone -->
 					<button id="favoriteBtn" onclick="toggleFavorite()"
-						class="px-6 font-semibold py-3 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light">
-						<!-- icon and text set by JS -->
+						class="w-full sm:w-auto font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light">
 					</button>
 				</div>
 
