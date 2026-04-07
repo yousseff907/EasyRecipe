@@ -10,6 +10,7 @@ from models.recipe import Recipe
 from models.user import User
 from models.verification import Verification
 from models.user_favorites import UserFavorites
+from models.email_rate_limit import EmailRateLimit
 
 Base.metadata.create_all(bind=engine)
 

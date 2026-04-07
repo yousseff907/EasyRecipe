@@ -10,4 +10,5 @@ class Verification(Base):
 	code = Column(String, nullable=False)
 	expires_at = Column(DateTime, nullable=False)
 	created_at = Column(DateTime, default=datetime.now)
+	attempts = Column(Integer, nullable=False, default=0)
 	used = Column(Boolean, default=False)

@@ -7,7 +7,7 @@ import os
 import secrets
 from utils.validators import *
 from utils.database import *
-from datetime import datetime
+from datetime import datetime, date
 from services.ai_processor import analyze_with_ai, build_ai_recipe
 from services.email_service import send_email
 from services.auth_service import create_authentificator
@@ -121,7 +121,7 @@ class LoginRequest(BaseModel):
 	turnstile_token : str
 
 @app.post("/api/auth/request-code")
-async def	login(body: LoginRequest, request : Request, db = Depends(get_db)):
+async def	login(body: LoginRequest, request : Request, db : Session = Depends(get_db)):
 	user_ip = request.headers.get("CF-Connecting-IP")
 	async with httpx.AsyncClient() as client:
 		response = await client.post(
@@ -135,19 +135,46 @@ async def	login(body: LoginRequest, request : Request, db = Depends(get_db)):
 	if not result.get('success'):
 		raise HTTPException(status_code=400, detail="CAPTCHA verification failed")
 	try:
-		email = body.email
+		rate_limit = db.query(EmailRateLimit).filter(EmailRateLimit.email == body.email).first()
+		if rate_limit is None:
+			rate_limit = EmailRateLimit(email = body.email)
+			db.add(rate_limit)
+			db.commit()
+			db.refresh(rate_limit)
+		old_verification = db.query(Verification).filter(Verification.email == body.email, Verification.used == False, Verification.expires_at > datetime.now()).first()
+		if old_verification != None and old_verification.attempts >= 5:
+			return {"message" : "Too many attempts. Please wait for your code to expire and request a new one."}
+		elif old_verification != None and old_verification.attempts < 5:
+			return {"message" : "A code was already sent to your email. Please check your inbox."}
+		if rate_limit.last_code_date.date() != date.today():
+			rate_limit.sent_emails = 0
+		if rate_limit.sent_emails >= 3:
+			return {"message" : "You have reached the daily limit of 3 codes. Please try again tomorrow."}
+		rate_limit.sent_emails += 1
+		rate_limit.last_code_date = datetime.now()
+		db.commit()
+		db.refresh(rate_limit)
 		code = str(secrets.randbelow(1000000)).zfill(6)
-		verification = create_authentificator(db, code, email)
-		send_email(email, code)
+		verification = create_authentificator(db, code, body.email)
+		send_email(body.email, code)
 		return {"message": "Code sent"}
+	except HTTPException:
+		raise
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 
 @app.post("/api/auth/submit-code")
-def	verify(request: VerificationCode, db = Depends(get_db)):
+def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 	try:
+
 		db.query(Verification).filter(Verification.email == request.email, Verification.expires_at < datetime.now()).delete()
 		db.commit()
+
+		active_code = db.query(Verification).filter(Verification.email == request.email, Verification.used == False).first()
+		if active_code is None:
+			raise HTTPException(status_code=400, detail="No active code found. Please request a new one.")
+		if active_code.attempts >= 5:
+			return {"message" : "Too many attempts. Please wait for your code to expire and request a new one."}
 		otp = request.otp
 		verification = db.query(Verification).filter(
 			Verification.email == request.email,
@@ -156,8 +183,13 @@ def	verify(request: VerificationCode, db = Depends(get_db)):
 		).first()
 
 		if not verification:
+			active_code.attempts += 1
+			db.commit()
+			db.refresh(active_code)
 			raise HTTPException(status_code=400, detail="Invalid code")
 		if verification.expires_at < datetime.now():
+			db.delete(verification)
+			db.commit()
 			raise HTTPException(status_code=400, detail="Code expired")
 
 		else:
@@ -171,6 +203,8 @@ def	verify(request: VerificationCode, db = Depends(get_db)):
 				db.commit()
 				db.refresh(user)
 			token = jwt_helper.create_jwt_token(user.id, user.email)
+	except HTTPException:
+		raise
 	except Exception as e:
 		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
 	return {"status" : "success", "token" : token}
@@ -328,6 +362,7 @@ def delete_account(request : Feedback, current_user : User = Depends(get_current
 		with open("feedback.txt", '+a') as f:
 			f.write(request.feedback+'\n')
 		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
+		db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id).delete()
 		db.delete(current_user)
 		db.commit()
 		return {"message": "Account deleted successfully"}
@@ -359,6 +394,7 @@ def change_username(request : Username, current_user : User = Depends(get_curren
 	current_user.username = request.string
 	db.commit()
 	db.refresh(current_user)
+	return {"message": "success"}
 
 
 class Bio(BaseModel):
@@ -373,6 +409,7 @@ def change_bio(request : Bio, current_user : User = Depends(get_current_user), d
 	current_user.bio = request.string
 	db.commit()
 	db.refresh(current_user)
+	return {"message": "success"}
 
 @app.patch("/api/recipes/{id}")
 def change_recipe_status(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
@@ -406,3 +443,41 @@ def unsave_recipe_from_favorite(id : int, current_user : User = Depends(get_curr
 	db.delete(user_favorite)
 	db.commit()
 	return {"message" : "Recipe removed from favorites"}
+
+@app.get("/api/search")
+def search(query: str, type: str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+	if type == "recipes":
+		recipes = db.query(Recipe).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).all()
+		if not recipes:
+			return {"message" : "No matches were found."}
+		recipe_list = []
+		for r in recipes:
+			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+		return {"recipes" : recipe_list}
+	
+	if type == "users":
+		users = db.query(User).filter(User.username.like(f"%{query}%")).all()
+		if not users:
+			return {"message" : "No matches were found."}
+		user_list = []
+		for u in users:
+			user_list.append({"username" : u.username})
+		return {"users" : user_list}
+
+@app.get("/api/user/{username}")
+def get_user_info(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+	user = db.query(User).filter(User.username == username).first()
+	if user is None:
+		raise HTTPException(status_code=404, detail="User not found")
+	return {"id" : user.id, "username" : username, "bio" : user.bio}
+
+@app.get("/api/user/{username}/recipes")
+def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+	user = db.query(User).filter(User.username == username).first()
+	if user is None:
+		raise HTTPException(status_code=404, detail="User not found")
+	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).all()
+	recipe_list = []
+	for r in recipes:
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+	return {"recipes" : recipe_list}
