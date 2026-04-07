@@ -167,6 +167,8 @@ function displayRecipe(recipe) {
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}
+	console.log('username:', username);
+	console.log('backBtn:', backBtn);
 }
 
 // Helper: Update privacy button text and style (never touches hidden class)
