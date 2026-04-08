@@ -8,3 +8,4 @@ sqlalchemy
 pyjwt
 resend
 openai
+requests

@@ -2,6 +2,7 @@ import subprocess
 from glob import glob
 import uuid
 import os
+import requests
 
 def download_audio(url):
 	try:
@@ -72,3 +73,32 @@ def get_caption(url):
 
 	except subprocess.CalledProcessError as e:
 		raise RuntimeError("Failed to fetch caption") from e
+	
+def get_slideshow_data(url):
+	try:
+		response = requests.get(f"https://tikwm.com/api/?url={url}")
+		data = response.json()
+		if data.get("code") != 0:
+			raise RuntimeError("Failed to fetch slideshow data")
+		return {
+			"caption": data["data"]["title"],
+			"images": data["data"]["images"],
+			"author": data["data"]["author"]["unique_id"]
+        }
+	except Exception as e:
+		raise RuntimeError("Failed to fetch slideshow data") from e
+	
+def download_slideshow_images(image_urls):
+	image_paths = []
+	for index, image_url in enumerate(image_urls[:20]):
+		try:
+			file_id = str(uuid.uuid4())
+			image_path = f"data/image_{file_id}_{index}.jpg"
+			response = requests.get(image_url)
+			with open(image_path, "wb") as f:
+				f.write(response.content)
+			image_paths.append(image_path)
+		except Exception as e:
+			print(f"Failed to download image {index}: {e}")
+			continue
+	return image_paths

@@ -8,7 +8,7 @@ import secrets
 from utils.validators import *
 from utils.database import *
 from datetime import datetime, date
-from services.ai_processor import analyze_with_ai, build_ai_recipe
+from services.ai_processor import analyze_video_with_ai, build_ai_recipe, analyze_slideshow_with_ai
 from services.email_service import send_email
 from services.auth_service import create_authentificator
 from utils import jwt_helper
@@ -49,18 +49,25 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		url = request.url
 		instructions = request.instructions
 		validate_video_url(url)
-		audio_path = download_audio(url)
 		try:
 			caption = get_caption(url)
 		except:
 			caption = ""
-		transcript = extract_transcript(audio_path)
-		video_path = download_video(url)
-		recipe_dictionary = analyze_with_ai(transcript, caption, video_path, instructions)
-		if os.path.exists(audio_path):
-			os.remove(audio_path)
-		if os.path.exists(video_path):
-			os.remove(video_path)
+		recipe_dictionary = dict()
+		if '/photo/' in url:
+			slideshow_data = get_slideshow_data(url)
+			photo_paths = download_slideshow_images(slideshow_data.get("images"))
+			recipe_dictionary = analyze_slideshow_with_ai(f"caption: {slideshow_data.get('caption')}, by: {slideshow_data.get('author')}", photo_paths, instructions)
+			for photo_path in photo_paths:
+				if os.path.exists(photo_path):
+					os.remove(photo_path)
+		else:
+			video_path = download_video(url)
+			transcript = extract_transcript(video_path)
+			recipe_dictionary = analyze_video_with_ai(transcript, caption, video_path, instructions)
+
+			if os.path.exists(video_path):
+				os.remove(video_path)
 
 		if recipe_dictionary == None:
 			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
