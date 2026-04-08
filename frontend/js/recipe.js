@@ -159,7 +159,7 @@ function displayRecipe(recipe) {
 	// Back button
 	const urlParams = new URLSearchParams(window.location.search);
 	const username = urlParams.get('username');
-	const backBtn = document.querySelector('a[href="/recipes"]');
+	const backBtn = document.getElementById('backBtn');
 
 	if (backBtn && username) {
 		backBtn.href = `/user/${username}`;
