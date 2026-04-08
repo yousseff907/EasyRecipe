@@ -89,7 +89,7 @@ function displayRecipes(recipes) {
 	recipes.forEach(recipe => {
 		const card = document.createElement('div');
 		card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden border border-gray-100';
-		card.onclick = () => window.location.href = `/recipe?id=${recipe.id}`;
+		card.onclick = () => window.location.href = `/recipe?id=${recipe.id}&from=search`;
 
 		card.innerHTML = `
 			<div class="p-6">

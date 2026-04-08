@@ -158,17 +158,19 @@ function displayRecipe(recipe) {
 
 	// Back button
 	const urlParams = new URLSearchParams(window.location.search);
-	const username = urlParams.get('username');
 	const backBtn = document.getElementById('backBtn');
+	const username = urlParams.get('username');
+	const from = urlParams.get('from');
 
 	if (backBtn && username) {
 		backBtn.href = `/user/${username}`;
 		backBtn.textContent = '← Back to Profile';
+	} else if (backBtn && from === 'search') {
+		backBtn.href = '/search';
+		backBtn.textContent = '← Back to Search';
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}
-	console.log('username:', username);
-	console.log('backBtn:', backBtn);
 }
 
 // Helper: Update privacy button text and style (never touches hidden class)
