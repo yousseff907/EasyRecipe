@@ -90,7 +90,7 @@ def get_slideshow_data(url):
 	
 def download_slideshow_images(image_urls):
 	image_paths = []
-	for index, image_url in enumerate(image_urls[:20]):
+	for index, image_url in enumerate(image_urls[:25]):
 		try:
 			file_id = str(uuid.uuid4())
 			image_path = f"data/image_{file_id}_{index}.jpg"
