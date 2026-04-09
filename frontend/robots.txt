@@ -1,0 +1,32 @@
+User-agent: Googlebot
+Allow: /r/
+
+User-agent: ClaudeBot
+Allow: /r/
+
+User-agent: Bingbot
+Allow: /r/
+
+User-agent: DuckDuckBot
+Allow: /r/
+
+User-agent: Slurp
+Allow: /r/
+
+User-agent: Applebot
+Allow: /r/
+
+User-agent: facebookexternalhit
+Allow: /r/
+
+User-agent: Twitterbot
+Allow: /r/
+
+User-agent: LinkedInBot
+Allow: /r/
+
+User-agent: WhatsApp
+Allow: /r/
+
+User-agent: *
+Disallow: /

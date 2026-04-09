@@ -18,6 +18,7 @@ from services.moderation_service import moderate_content
 from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
 import httpx
 from config import TURNSTILE_SECRET_KEY
+from fastapi.templating import Jinja2Templates
 
 def	delete_file(path: str):
 	try:
@@ -511,3 +512,29 @@ def get_user_recipe(username : str, recipe_id : int, current_user : User = Depen
 		"current_user_id" : current_user.id,
 		"is_favorited" : is_favorited
 		}
+
+
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/r/{id}")
+def get_public_recipe(request : Request, id : int, db : Session = Depends(get_db)):
+	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
+	if recipe is None:
+		return HTTPException(status_code=404, detail="Recipe Not Found")
+	owner = db.query(User).filter(User.id == recipe.user_id).first()
+	if owner is None:
+			return HTTPException(status_code=404, detail="Recipe Not Found")
+	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
+	return templates.TemplateResponse("recipe_public.html", {
+		"request": request,
+		"title": recipe.title,
+		"recipe_id": recipe.id,
+		"owner_username": owner.username,
+		"prep_time": recipe.prep_time,
+		"cook_time": recipe.cook_time,
+		"servings": recipe.servings,
+		"serving_size": recipe.serving_size,
+		"ingredients": json.loads(recipe.ingredients),
+		"steps": json.loads(recipe.steps),
+		"nutrition": nutrition
+	})
