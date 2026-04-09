@@ -104,13 +104,15 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 
 
 @app.get("/api/recipes/{recipe_id}/download-video")
-def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user), db = Depends(get_db)):
+def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	video_path = None
 	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True)).first()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	else:
 		url = recipe.video_url
+		if '/photo/' in url or not url:
+			raise HTTPException(status_code=400, detail="Video download not available for photo slideshows")
 	try:
 		video_path = download_video(url)
 		background_task.add_task(delete_file, video_path)
