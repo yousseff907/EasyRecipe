@@ -145,9 +145,11 @@ function displayRecipe(recipe) {
 	// Show owner-only buttons
 	const isOwner = recipe.owner_id === recipe.current_user_id;
 	if (isOwner) {
-		document.getElementById('downloadBtn').classList.remove('hidden');
 		document.getElementById('deleteBtn').classList.remove('hidden');
 		document.getElementById('privacyBtn').classList.remove('hidden');
+	}
+	if (isOwner || recipe.is_public) {
+		document.getElementById('downloadBtn').classList.remove('hidden');
 	}
 
 	// Set initial state of privacy button
