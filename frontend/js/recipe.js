@@ -238,6 +238,7 @@ function togglePrivacy() {
 				window.currentIsPublic = data.is_public;
 				updatePrivacyBtn(data.is_public);
 				showMessage(data.is_public ? 'Recipe is now public' : 'Recipe is now private', false);
+				window.location.reload();
 			} else {
 				showMessage(data.detail || 'Failed to update privacy', true);
 			}
