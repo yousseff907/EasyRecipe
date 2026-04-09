@@ -539,3 +539,42 @@ def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 		"steps": json.loads(recipe.steps),
 		"nutrition": nutrition
 	})
+
+
+class RecipeEdit(BaseModel):
+    title: str
+    ingredients: list[str]
+    steps: list[str]
+    prep_time: int | None = None
+    cook_time: int | None = None
+    servings: int | None = None
+    serving_size: str | None = None
+    nutrition: NutritionInput | None = None
+
+@app.patch("/api/recipes/{id}/edit")
+def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+	try:
+		recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
+		if recipe is None:
+			raise HTTPException(status_code=404, detail="Recipe Not Found")
+		unsafe_content = moderate_content(title=request.title,
+										ingredients = request.ingredients,
+										steps = request.steps)
+		if unsafe_content == True:
+			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
+								f"Please review and remove inappropriate content"))
+		recipe.title = request.title
+		recipe.ingredients = json.dumps(request.ingredients)
+		recipe.steps = json.dumps(request.steps)
+		recipe.prep_time = request.prep_time
+		recipe.cook_time = request.cook_time
+		recipe.servings = request.servings
+		recipe.serving_size = request.serving_size
+		recipe.nutrition = json.dumps(request.nutrition.model_dump()) if request.nutrition else None
+		db.commit()
+		db.refresh(recipe)
+		return {"status" : "success"}
+	except HTTPException:
+		raise
+	except Exception as e:
+		raise HTTPException(status_code=500)

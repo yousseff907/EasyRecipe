@@ -147,6 +147,7 @@ function displayRecipe(recipe) {
 	if (isOwner) {
 		document.getElementById('deleteBtn').classList.remove('hidden');
 		document.getElementById('privacyBtn').classList.remove('hidden');
+		document.getElementById('editBtn').classList.remove('hidden');
 	}
 	if ((isOwner || recipe.is_public) && recipe.video_url && !recipe.video_url.includes('/photo/')) {
 		document.getElementById('downloadBtn').classList.remove('hidden');
