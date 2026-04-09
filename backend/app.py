@@ -525,7 +525,7 @@ def get_public_recipe(request : Request, id : int, db : Session = Depends(get_db
 	if owner is None:
 			return HTTPException(status_code=404, detail="Recipe Not Found")
 	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
-	return templates.TemplateResponse("recipe_public.html", {
+	return templates.TemplateResponse(name="recipe_public.html", context={
 		"request": request,
 		"title": recipe.title,
 		"recipe_id": recipe.id,
