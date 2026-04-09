@@ -517,7 +517,7 @@ def get_user_recipe(username : str, recipe_id : int, current_user : User = Depen
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/r/{id}")
-def get_public_recipe(request : Request, id : int, db : Session = Depends(get_db)):
+def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
 	if recipe is None:
 		return HTTPException(status_code=404, detail="Recipe Not Found")
@@ -525,8 +525,7 @@ def get_public_recipe(request : Request, id : int, db : Session = Depends(get_db
 	if owner is None:
 			return HTTPException(status_code=404, detail="Recipe Not Found")
 	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
-	return templates.TemplateResponse(name="recipe_public.html", context={
-		"request": request,
+	return templates.TemplateResponse(name="recipe_public.html", request=rq, context={
 		"title": recipe.title,
 		"recipe_id": recipe.id,
 		"owner_username": owner.username,
