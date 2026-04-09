@@ -520,26 +520,30 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/r/{id}")
 def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
-	if recipe is None:
-		return HTTPException(status_code=404, detail="Recipe Not Found")
-	owner = db.query(User).filter(User.id == recipe.user_id).first()
-	if owner is None:
-			return HTTPException(status_code=404, detail="Recipe Not Found")
-	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
-	return templates.TemplateResponse(name="recipe_public.html", request=rq, context={
-		"title": recipe.title,
-		"recipe_id": recipe.id,
-		"owner_username": owner.username,
-		"prep_time": recipe.prep_time,
-		"cook_time": recipe.cook_time,
-		"servings": recipe.servings,
-		"serving_size": recipe.serving_size,
-		"ingredients": json.loads(recipe.ingredients),
-		"steps": json.loads(recipe.steps),
-		"nutrition": nutrition
-	})
-
+	try:
+		recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
+		if recipe is None:
+			raise HTTPException(status_code=404, detail="Recipe Not Found")
+		owner = db.query(User).filter(User.id == recipe.user_id).first()
+		if owner is None:
+				raise HTTPException(status_code=404, detail="Recipe Not Found")
+		nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
+		return templates.TemplateResponse(name="recipe_public.html", request=rq, context={
+			"title": recipe.title,
+			"recipe_id": recipe.id,
+			"owner_username": owner.username,
+			"prep_time": recipe.prep_time,
+			"cook_time": recipe.cook_time,
+			"servings": recipe.servings,
+			"serving_size": recipe.serving_size,
+			"ingredients": json.loads(recipe.ingredients),
+			"steps": json.loads(recipe.steps),
+			"nutrition": nutrition
+		})
+	except HTTPException:
+		raise
+	except Exception:
+		raise
 
 class RecipeEdit(BaseModel):
     title: str
