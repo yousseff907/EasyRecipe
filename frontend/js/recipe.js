@@ -156,6 +156,11 @@ function displayRecipe(recipe) {
 	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
 
+	if (recipe.is_public) {
+		document.getElementById('shareBtn').classList.remove('hidden');
+		document.getElementById('pdfBtn').classList.remove('hidden');
+	}
+
 	// Back button
 	const urlParams = new URLSearchParams(window.location.search);
 	const backBtn = document.getElementById('backBtn');
@@ -171,6 +176,19 @@ function displayRecipe(recipe) {
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}
+}
+
+function shareRecipe() {
+	const recipeId = window.currentRecipeId;
+	const url = `https://www.easyrecipe.online/r/${recipeId}`;
+	navigator.clipboard.writeText(url).then(() => {
+		showMessage('Link copied to clipboard!', false);
+	});
+}
+
+function downloadPDF() {
+	const recipeId = window.currentRecipeId;
+	window.open(`https://www.easyrecipe.online/r/${recipeId}?print=true`, '_blank');
 }
 
 // Helper: Update privacy button text and style (never touches hidden class)
