@@ -496,7 +496,7 @@ def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = De
 def get_user_recipe(username : str, recipe_id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
 	if recipe is None:
-		raise HTTPException(status_code=404, detail="Recipe not found")
+		return HTTPException(status_code=404, detail="Recipe not found")
 	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == recipe_id).first() is not None
 	return {
 		"id": recipe.id,
