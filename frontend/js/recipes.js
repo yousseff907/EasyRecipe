@@ -68,7 +68,7 @@ function displayRecipes(recipes) {
                     <span>${recipe.servings || '-'}</span>
                 </div>
                 <p class="text-xs text-gray-500">
-                    Created ${new Date(recipe.created_at).toLocaleDateString()}
+                    Created ${recipe.created_at ? new Date(recipe.created_at + 'Z').toLocaleDateString() : ''}
                 </p>
             </div>
             <div class="bg-pink-light px-6 py-3 text-pink-dark font-semibold text-sm">
