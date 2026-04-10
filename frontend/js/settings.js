@@ -51,6 +51,8 @@ async function changeBio() {
 		if (response.ok) {
 			showMessage('Bio updated successfully!', false);
 			document.getElementById('currentBio').textContent = newBio;
+			document.getElementById('newBio').value = '';
+			document.getElementById('bioCount').textContent = '0/200';
 		} else {
 			showMessage(data.detail || 'Failed to update bio', true);
 		}

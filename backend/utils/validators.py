@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 DANGEROUS_CHARS = [
     # Script injection
     '<',
@@ -80,3 +82,6 @@ def validate_video_url(url):
 		raise ValueError("URL format invalid or contains dangerous characters")
 	if not is_supported_platform(url):
 		raise ValueError("Platform not supported. Use TikTok, Instagram, or Facebook.")
+	parsed = urlparse(url)
+	if len(parsed.path) < 2:
+		raise ValueError("URL doesn't appear to link to a video. Please paste a direct video link.")
