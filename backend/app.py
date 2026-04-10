@@ -226,14 +226,14 @@ def get_recipes(current_user : User = Depends(get_current_user), db = Depends(ge
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	recipe_list = []
 	for r in recipe:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/favorites")
 def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	recipe_list = []
 	for r in current_user.favorites.all():
-		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public})
+		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/{id}")
@@ -462,7 +462,7 @@ def search(query: str, type: str, db : Session = Depends(get_db), _: User = Depe
 			return {"message" : "No matches were found."}
 		recipe_list = []
 		for r in recipes:
-			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
 		return {"recipes" : recipe_list}
 	
 	if type == "users":
@@ -489,14 +489,14 @@ def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = De
 	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).all()
 	recipe_list = []
 	for r in recipes:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public})
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/user/{username}/recipes/{recipe_id}")
 def get_user_recipe(username : str, recipe_id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
 	if recipe is None:
-		return HTTPException(status_code=404, detail="Recipe not found")
+		raise HTTPException(status_code=404, detail="Recipe not found")
 	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == recipe_id).first() is not None
 	return {
 		"id": recipe.id,
