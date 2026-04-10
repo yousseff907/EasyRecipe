@@ -43,7 +43,7 @@ function loadProfile(username) {
 			document.getElementById('profileAvatar').textContent = data.username.charAt(0).toUpperCase();
 			document.getElementById('profileUsername').textContent = '@' + data.username;
 			document.getElementById('profileBio').textContent = data.bio || 'No bio yet.';
-			document.getElementById('profileRecipeCount').textContent = `${data.public_recipe_count} public recipes`;
+			document.getElementById('profileRecipeCount').textContent = `${data.public_recipe_count} public recipe(s)`;
 
 			document.title = `${data.username} - EasyRecipe`;
 
