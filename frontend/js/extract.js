@@ -3,6 +3,23 @@ window.addEventListener('DOMContentLoaded', () => {
 	checkAuth(); // Now from utils.js
 });
 
+function startProgressMessages() {
+	const messages = [
+		{ text: "Downloading video...", delay: 0 },
+		{ text: "Extracting audio...", delay: 8000 },
+		{ text: "Transcribing speech...", delay: 18000 },
+		{ text: "Analyzing recipe with AI...", delay: 30000 },
+		{ text: "Almost done...", delay: 50000 },
+	];
+
+	messages.forEach(({ text, delay }) => {
+		setTimeout(() => {
+			const msg = document.getElementById('loadingMessage');
+			if (msg) msg.textContent = text;
+		}, delay);
+	});
+}
+
 // Function: Extract recipe from video URL
 function extractRecipe() {
 	const url = document.getElementById('videoUrl').value;
@@ -20,6 +37,7 @@ function extractRecipe() {
 	// Show loading state
 	document.getElementById('extractBtn').disabled = true;
 	document.getElementById('loading').classList.remove('hidden');
+	startProgressMessages();
 	document.getElementById('recipeDisplay').classList.add('hidden');
 
 	// Call backend

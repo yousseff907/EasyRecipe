@@ -222,8 +222,6 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 @app.get("/api/recipes")
 def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).order_by(Recipe.created_at.desc()).all()
-	if not recipe:
-		raise HTTPException(status_code=404, detail="Recipe not found")
 	recipe_list = []
 	for r in recipe:
 		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
