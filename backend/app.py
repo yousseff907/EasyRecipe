@@ -379,12 +379,13 @@ def delete_account(request : Feedback, current_user : User = Depends(get_current
 		raise HTTPException(status_code=404, detail=str(e))
 
 @app.get("/api/user/me")
-def get_current_user_info(current_user: User = Depends(get_current_user)):
+def get_current_user_info(current_user: User = Depends(get_current_user), db : Session = Depends(get_db)):
 	return {
 		"id": current_user.id,
 		"email": current_user.email,
 		"username": current_user.username,
-		"bio": current_user.bio
+		"bio": current_user.bio,
+		"public_recipe_count" : db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.is_public == True).count()
 	}
 
 
@@ -478,7 +479,11 @@ def get_user_info(username : str, db : Session = Depends(get_db), _: User = Depe
 	user = db.query(User).filter(User.username == username).first()
 	if user is None:
 		raise HTTPException(status_code=404, detail="User not found")
-	return {"id" : user.id, "username" : username, "bio" : user.bio}
+	return {"id" : user.id,
+			"username" : username,
+			"bio" : user.bio,
+			"public_recipe_count" : db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).count()
+			}
 
 @app.get("/api/user/{username}/recipes")
 def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):

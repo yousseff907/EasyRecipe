@@ -12,6 +12,7 @@ async function loadCurrentUsername() {
 			const data = await response.json();
 			document.getElementById('currentUsername').textContent = data.username || data.email;
 			document.getElementById('currentBio').textContent = data.bio || 'No bio yet.';
+			document.getElementById('publicRecipeCount').textContent = `${data.public_recipe_count} public recipes`;
 			if (data.bio) {
 				document.getElementById('newBio').value = data.bio;
 			}
