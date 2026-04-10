@@ -220,8 +220,8 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 	return {"status" : "success", "token" : token}
 
 @app.get("/api/recipes")
-def get_recipes(current_user : User = Depends(get_current_user), db = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).all()
+def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).order_by(Recipe.created_at.desc()).all()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	recipe_list = []
@@ -232,7 +232,8 @@ def get_recipes(current_user : User = Depends(get_current_user), db = Depends(ge
 @app.get("/api/recipes/favorites")
 def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	recipe_list = []
-	for r in current_user.favorites.all():
+	recipes = db.query(Recipe).join(UserFavorites, UserFavorites.recipe_id == Recipe.id).filter(UserFavorites.user_id == current_user.id).order_by(UserFavorites.saved_at.desc()).all()
+	for r in recipes:
 		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at})
 	return {"recipes" : recipe_list}
 
@@ -457,7 +458,7 @@ def unsave_recipe_from_favorite(id : int, current_user : User = Depends(get_curr
 @app.get("/api/search")
 def search(query: str, type: str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
 	if type == "recipes":
-		recipes = db.query(Recipe).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).all()
+		recipes = db.query(Recipe).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
 		if not recipes:
 			return {"message" : "No matches were found."}
 		recipe_list = []
@@ -486,7 +487,7 @@ def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = De
 	user = db.query(User).filter(User.username == username).first()
 	if user is None:
 		raise HTTPException(status_code=404, detail="User not found")
-	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).all()
+	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
 	recipe_list = []
 	for r in recipes:
 		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
