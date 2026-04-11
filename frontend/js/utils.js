@@ -102,7 +102,7 @@ function shareRecipe(recipeId) {
 }
 
 function createRecipeCard(recipe, onclick) {
-    const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
+    const card = document.createElement('div');
     card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden';
     card.onclick = onclick;
     card.innerHTML = `
