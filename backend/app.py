@@ -589,9 +589,13 @@ def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), 
 	
 @app.get("/api/feed")
 def get_feed(db : Session = Depends(get_db)):
-	recipes = db.query(Recipe).filter(Recipe.is_public == True).order_by(Recipe.created_at.desc()).limit(3).all()
+	result = db.query(Recipe, User).join(User, User.id == Recipe.user_id).filter(Recipe.is_public == True).order_by(Recipe.created_at.desc()).limit(3).all()
 	recipe_list = []
-	for r in recipes:
-		owner = db.get(User, r.user_id)
-		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at, "owner_username": owner.username if owner else "unknown"})
-		return {"recipes": recipe_list}
+	for r, owner in result:
+			recipe_list.append({
+				"id": r.id,
+				"title": r.title,
+				"prep_time": r.prep_time,
+				"owner_username": owner.username
+			})
+	return {"recipes": recipe_list}
