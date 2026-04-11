@@ -72,7 +72,7 @@ function loadMyFavorites() {
 
 function loadFeed() {
 	const token = localStorage.getItem('auth_token');
-	fetch('/api/user/feed', {
+	fetch('/api/home/feed', {
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
 		.then(r => r.json())
