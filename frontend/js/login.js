@@ -128,7 +128,7 @@ function loadFeed() {
 window.addEventListener('DOMContentLoaded', () => {
 	const token = localStorage.getItem('auth_token');
 	if (token) {
-		window.location.href = '/extract';
+		window.location.href = '/home';
 	}
 	loadFeed();
 });

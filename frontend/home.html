@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Home - EasyRecipe</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						'pink-light': '#FFE4E9',
+						'pink-medium': '#FFB3C1',
+						'pink-dark': '#FF8FA3',
+					}
+				}
+			}
+		}
+	</script>
+</head>
+
+<body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
+	<header class="bg-white shadow-sm">
+		<div class="w-full px-4 py-4">
+			<div class="flex justify-between items-center">
+				<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
+				<button id="menuBtn" onclick="toggleMenu()"
+					class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
+					<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+							d="M4 6h16M4 12h16M4 18h16"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div id="mobileMenu"
+			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
+			<nav class="py-2">
+				<a href="/home" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Home</a>
+				<a href="/extract" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Extract from Video</a>
+				<a href="/make-your-own" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Make Your Own</a>
+				<a href="/ai-recipe" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">AI Recipe Builder</a>
+				<a href="/recipes" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">My Recipes</a>
+				<a href="/favorites" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">My Favorites</a>
+				<a href="/search" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Search</a>
+				<a href="/settings" class="block px-6 py-3 text-gray-700 hover:bg-pink-light hover:text-pink-dark transition">Profile & Settings</a>
+				<hr class="my-2 border-pink-light">
+				<button onclick="logout()" class="block w-full text-left px-6 py-3 text-red-600 hover:bg-red-50 transition">Logout</button>
+			</nav>
+		</div>
+	</header>
+
+	<main class="max-w-4xl mx-auto px-4 py-8 w-full space-y-6">
+
+		<!-- Welcome & Quick Actions -->
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<h2 id="welcomeMsg" class="text-3xl font-bold text-gray-800 mb-2">Welcome back!</h2>
+			<p class="text-gray-500 mb-6">What would you like to do today?</p>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+				<a href="/extract"
+					class="bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-4 rounded-xl transition shadow-md hover:shadow-lg text-center flex flex-col items-center">
+					<svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.868V15.13a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+					</svg>
+					Extract from Video
+				</a>
+				<a href="/make-your-own"
+					class="bg-white border-2 border-pink-dark text-pink-dark hover:bg-pink-light font-semibold px-6 py-4 rounded-xl transition shadow-md hover:shadow-lg text-center flex flex-col items-center">
+					<svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+					</svg>
+					Make Your Own
+				</a>
+				<a href="/ai-recipe"
+					class="bg-white border-2 border-pink-dark text-pink-dark hover:bg-pink-light font-semibold px-6 py-4 rounded-xl transition shadow-md hover:shadow-lg text-center flex flex-col items-center">
+					<svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+					</svg>
+					AI Recipe Builder
+				</a>
+			</div>
+		</div>
+
+		<!-- My Recent Recipes -->
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<div class="flex items-center justify-between mb-6">
+				<h3 class="text-2xl font-bold text-gray-800">My Recent Recipes</h3>
+				<a href="/recipes" class="text-pink-dark hover:underline text-sm font-semibold">View All →</a>
+			</div>
+			<div id="myRecipesLoading" class="text-center py-4">
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-dark"></div>
+			</div>
+			<div id="myRecipesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></div>
+			<div id="myRecipesEmpty" class="hidden text-center py-6">
+				<p class="text-gray-500 mb-4">You haven't saved any recipes yet.</p>
+				<a href="/extract" class="inline-block bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-3 rounded-lg transition">Extract Your First Recipe</a>
+			</div>
+		</div>
+
+		<!-- My Favorites -->
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<div class="flex items-center justify-between mb-6">
+				<h3 class="text-2xl font-bold text-gray-800">My Favorites</h3>
+				<a href="/favorites" class="text-pink-dark hover:underline text-sm font-semibold">View All →</a>
+			</div>
+			<div id="myFavoritesLoading" class="text-center py-4">
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-dark"></div>
+			</div>
+			<div id="myFavoritesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></div>
+			<div id="myFavoritesEmpty" class="hidden text-center py-6">
+				<p class="text-gray-500">You haven't saved any favorites yet.</p>
+			</div>
+		</div>
+
+		<!-- Discover -->
+		<div class="bg-white rounded-2xl shadow-xl p-8">
+			<div class="flex items-center justify-between mb-6">
+				<h3 class="text-2xl font-bold text-gray-800">Discover</h3>
+				<a href="/search" class="text-pink-dark hover:underline text-sm font-semibold">See More →</a>
+			</div>
+			<div id="feedLoading" class="text-center py-4">
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-dark"></div>
+			</div>
+			<div id="feedGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></div>
+			<div id="feedEmpty" class="hidden text-center py-6">
+				<p class="text-gray-500">No public recipes yet. Be the first to share one!</p>
+			</div>
+		</div>
+
+	</main>
+
+	<footer class="bg-white border-t mt-auto">
+		<div class="w-full px-4 py-6 text-center text-gray-600 text-sm">
+			<p>&copy; 2026 EasyRecipe. All rights reserved.</p>
+			<div class="mt-2 space-x-4">
+				<a href="/privacy" class="text-pink-dark hover:underline">Privacy Policy</a>
+				<a href="/terms" class="text-pink-dark hover:underline">Terms of Service</a>
+				<a href="/about" class="text-pink-dark hover:underline">About</a>
+				<a href="/contact" class="text-pink-dark hover:underline">Contact</a>
+			</div>
+		</div>
+	</footer>
+
+	<script src="/js/utils.js"></script>
+	<script src="/js/home.js"></script>
+</body>
+</html>
