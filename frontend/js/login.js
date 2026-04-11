@@ -1,11 +1,3 @@
-// Check if already logged in - redirect if so
-window.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-        window.location.href = '/extract';
-    }
-});
-
 // API Base URL - change this if deploying to production
 const API_URL = '';
 
@@ -106,3 +98,35 @@ function showMessage(text, isError) {
         : 'mt-4 p-4 rounded-lg bg-green-100 text-green-700';
     msgDiv.classList.remove('hidden');
 }
+
+function loadFeed() {
+    fetch('/api/feed?limit=3')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.recipes) return;
+            const container = document.getElementById('feedContainer');
+            data.recipes.forEach(recipe => {
+                const card = document.createElement('a');
+                card.href = `/r/${recipe.id}`;
+                card.className = 'flex-shrink-0 w-56 bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer';
+                card.innerHTML = `
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-800 text-sm line-clamp-2 mb-2">${recipe.title || 'Untitled'}</h3>
+                        <p class="text-xs text-pink-dark">by @${recipe.owner_username}</p>
+                        <p class="text-xs text-gray-400 mt-1">${recipe.prep_time ? recipe.prep_time + ' min' : ''}</p>
+                    </div>
+                    <div class="bg-pink-light px-4 py-2 text-pink-dark text-xs font-semibold">View Recipe →</div>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(() => {});
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        window.location.href = '/extract';
+    }
+    loadFeed();
+});

@@ -88,6 +88,21 @@
 		</div>
 	</div>
 
+	<!-- Public Recipe Feed -->
+	<div class="px-4 pb-12 max-w-2xl mx-auto w-full">
+		<p class="text-center text-gray-500 text-sm mb-4 font-medium tracking-wide uppercase">Recently shared recipes</p>
+		
+		<div class="relative">
+			<!-- Fade edges -->
+			<div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-pink-light to-transparent z-10 pointer-events-none"></div>
+			<div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+			
+			<!-- Scrollable cards -->
+			<div id="feedContainer" class="flex gap-4 overflow-x-auto pb-2 px-4 scroll-smooth" style="scrollbar-width: none; -ms-overflow-style: none;">
+			</div>
+		</div>
+	</div>
+
 	<!-- Footer -->
 	<footer class="bg-white border-t mt-auto">
 		<div class="w-full px-4 py-6 text-center text-gray-600 text-sm">
@@ -154,6 +169,7 @@
 			border-color: #FF8FA3;
 			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
 		}
+		#feedContainer::-webkit-scrollbar { display: none; }
 	</style>
 
 	<script src="/js/login.js"></script>

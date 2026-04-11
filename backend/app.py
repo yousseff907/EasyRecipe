@@ -586,3 +586,12 @@ def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), 
 		raise
 	except Exception as e:
 		raise HTTPException(status_code=500)
+	
+@app.get("/api/feed")
+def get_feed(db : Session = Depends(get_db)):
+	recipes = db.query(Recipe).filter(Recipe.is_public == True).order_by(Recipe.created_at.desc()).limit(3).all()
+	recipe_list = []
+	for r in recipes:
+		owner = db.query(User).filter(User.id == r.user_id).first()
+		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at, "owner_username": owner.username if owner else "unknown"})
+		return {"recipes": recipe_list}
