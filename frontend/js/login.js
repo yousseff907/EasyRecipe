@@ -108,14 +108,14 @@ function loadFeed() {
             data.recipes.forEach(recipe => {
                 const card = document.createElement('a');
                 card.href = `/r/${recipe.id}`;
-				card.className = 'block bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden';
+				card.className = 'block bg-white rounded-xl border border-pink-medium hover:shadow-md transition p-4';
 				card.innerHTML = `
-					<div class="p-4 flex items-center justify-between">
-						<div>
-							<h3 class="font-bold text-gray-800 text-sm line-clamp-1">${recipe.title || 'Untitled'}</h3>
-							<p class="text-xs text-pink-dark mt-1">by @${recipe.owner_username}</p>
+					<div class="flex items-center justify-between gap-3">
+						<div class="min-w-0">
+							<h3 class="font-semibold text-gray-800 text-sm truncate">${recipe.title || 'Untitled'}</h3>
+							<p class="text-xs text-pink-dark mt-0.5">@${recipe.owner_username} ${recipe.prep_time ? '· ' + recipe.prep_time + ' min' : ''}</p>
 						</div>
-						<span class="text-pink-dark text-xs font-semibold ml-4 flex-shrink-0">View →</span>
+						<span class="text-pink-dark text-xs font-bold flex-shrink-0">→</span>
 					</div>
 				`;
                 container.appendChild(card);
