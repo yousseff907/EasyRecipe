@@ -89,17 +89,11 @@
 	</div>
 
 	<!-- Public Recipe Feed -->
-	<div class="px-4 pb-12 max-w-2xl mx-auto w-full">
+	<div class="px-4 pb-12 max-w-md mx-auto w-full">
 		<p class="text-center text-gray-500 text-sm mb-4 font-medium tracking-wide uppercase">Recently shared recipes</p>
-		
-		<div class="relative">
-			<!-- Fade edges -->
-			<div class="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-pink-light to-transparent z-10 pointer-events-none"></div>
-			<div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-			
-			<!-- Scrollable cards -->
-			<div id="feedContainer" class="flex gap-4 overflow-x-auto pb-2 px-4 scroll-smooth" style="scrollbar-width: none; -ms-overflow-style: none;">
-			</div>
+		<div id="feedContainer" class="space-y-3 relative">
+			<!-- fade out at bottom -->
+			<div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-pink-light to-transparent pointer-events-none z-10"></div>
 		</div>
 	</div>
 
