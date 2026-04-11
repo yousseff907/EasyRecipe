@@ -94,6 +94,7 @@ function displayRecipe(recipe) {
 
 	// Title
 	document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
+	document.getElementById('recipeOwner').textContent = `by @${recipe.owner_username}`;
 
 	// Times and servings
 	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';

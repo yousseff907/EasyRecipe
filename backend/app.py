@@ -224,16 +224,16 @@ def get_recipes(current_user : User = Depends(get_current_user), db : Session = 
 	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).order_by(Recipe.created_at.desc()).all()
 	recipe_list = []
 	for r in recipe:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": current_user.username})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/recipes/favorites")
-def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def get_favorites(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	recipe_list = []
-	recipes = db.query(Recipe).join(UserFavorites, UserFavorites.recipe_id == Recipe.id).filter(UserFavorites.user_id == current_user.id).order_by(UserFavorites.saved_at.desc()).all()
-	for r in recipes:
-		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at})
-	return {"recipes" : recipe_list}
+	result = db.query(Recipe, User).join(UserFavorites, UserFavorites.recipe_id == Recipe.id).join(User, User.id == Recipe.user_id).filter(UserFavorites.user_id == current_user.id).order_by(UserFavorites.saved_at.desc()).all()
+	for r, owner in result:
+		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at, "owner_username": owner.username})
+	return {"recipes": recipe_list}
 
 @app.get("/api/recipes/{id}")
 def get_single_recipe(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
@@ -241,6 +241,7 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first() is not None
+	owner = db.query(User).filter(User.id == recipe.user_id).first()
 	return {
 		"id": recipe.id,
 		"title": recipe.title,
@@ -255,7 +256,9 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 		"is_public" : recipe.is_public,
 		"owner_id" : recipe.user_id,
 		"current_user_id" : current_user.id,
-		"is_favorited" : is_favorited
+		"is_favorited" : is_favorited,
+		"serving_size": recipe.serving_size,
+		"owner_username": owner.username if owner else "unknown"
 		}
 
 @app.delete("/api/recipes/{id}")
@@ -271,10 +274,10 @@ def delete_recipe(id : int, current_user : User = Depends(get_current_user), db 
 
 
 class NutritionInput(BaseModel):
-    calories: int
-    protein_g: int | None = None
-    carbs_g: int | None = None
-    fat_g: int | None = None
+	calories: int
+	protein_g: int | None = None
+	carbs_g: int | None = None
+	fat_g: int | None = None
 
 class SelfMadeRecipe(BaseModel):
 	title : str
@@ -457,12 +460,12 @@ def unsave_recipe_from_favorite(id : int, current_user : User = Depends(get_curr
 @app.get("/api/search")
 def search(query: str, type: str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
 	if type == "recipes":
-		recipes = db.query(Recipe).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
-		if not recipes:
+		result = db.query(Recipe, User).join(User, User.id == Recipe.user_id).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
+		if not result:
 			return {"message" : "No matches were found."}
 		recipe_list = []
-		for r in recipes:
-			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
+		for r, owner in result:
+			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": owner.username if owner else "unknown"})
 		return {"recipes" : recipe_list}
 	
 	if type == "users":
@@ -486,14 +489,14 @@ def get_user_info(username : str, db : Session = Depends(get_db), _: User = Depe
 			}
 
 @app.get("/api/user/{username}/recipes")
-def get_user_recipe(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_user_recipes(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
 	user = db.query(User).filter(User.username == username).first()
 	if user is None:
 		raise HTTPException(status_code=404, detail="User not found")
 	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
 	recipe_list = []
 	for r in recipes:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at})
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": user.username})
 	return {"recipes" : recipe_list}
 
 @app.get("/api/user/{username}/recipes/{recipe_id}")
@@ -516,7 +519,9 @@ def get_user_recipe(username : str, recipe_id : int, current_user : User = Depen
 		"is_public" : recipe.is_public,
 		"owner_id" : recipe.user_id,
 		"current_user_id" : current_user.id,
-		"is_favorited" : is_favorited
+		"is_favorited" : is_favorited,
+		"serving_size": recipe.serving_size,
+		"owner_username": username
 		}
 
 
@@ -550,14 +555,14 @@ def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 		raise
 
 class RecipeEdit(BaseModel):
-    title: str
-    ingredients: list[str]
-    steps: list[str]
-    prep_time: int | None = None
-    cook_time: int | None = None
-    servings: int | None = None
-    serving_size: str | None = None
-    nutrition: NutritionInput | None = None
+	title: str
+	ingredients: list[str]
+	steps: list[str]
+	prep_time: int | None = None
+	cook_time: int | None = None
+	servings: int | None = None
+	serving_size: str | None = None
+	nutrition: NutritionInput | None = None
 
 @app.patch("/api/recipes/{id}/edit")
 def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), current_user : User = Depends(get_current_user)):
