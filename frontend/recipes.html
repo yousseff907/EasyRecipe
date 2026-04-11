@@ -29,7 +29,7 @@
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
 	<!-- Header with Hamburger Menu -->
-	<!-- Header with Hamburger Menu & Translate -->
+	
 	<header class="bg-white shadow-sm">
 		<div class="w-full px-4 py-4">
 			<!-- Desktop Header -->
@@ -37,8 +37,8 @@
 				<h1 class="text-2xl font-bold text-pink-dark">EasyRecipe</h1>
 
 				<div class="flex items-center gap-3">
-					<!-- Google Translate Widget -->
-					<div id="google_translate_element"></div>
+					
+					
 
 					<!-- Hamburger Menu Button -->
 					<button id="menuBtn" onclick="toggleMenu()"
@@ -83,82 +83,9 @@
 		</div>
 	</header>
 
-	<!-- Google Translate Script -->
-	<script type="text/javascript">
-		function googleTranslateElementInit() {
-			new google.translate.TranslateElement(
-				{
-					pageLanguage: 'en',
-					includedLanguages: 'en,ar,fr,es,it,de,pt,ru,zh-CN,ja,ko,tr,hi',
-					layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-					autoDisplay: false
-				},
-				'google_translate_element'
-			);
-		}
-	</script>
-	<script type="text/javascript"
-		src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	
 
-	<!-- Custom Styling -->
-	<style>
-		/* Google Translate Widget Styling */
-		#google_translate_element {
-			display: inline-block;
-		}
 
-		/* Hide Google's annoying top banner */
-		.goog-te-banner-frame.skiptranslate {
-			display: none !important;
-		}
-
-		/* Remove body top margin added by Google Translate */
-		body {
-			top: 0px !important;
-		}
-
-		/* Style the language dropdown to match pink theme */
-		.goog-te-combo {
-			padding: 8px 12px;
-			border: 2px solid #FFB3C1;
-			border-radius: 8px;
-			background-color: white;
-			color: #FF8FA3;
-			font-size: 14px;
-			font-weight: 500;
-			cursor: pointer;
-			outline: none;
-			transition: all 0.2s;
-		}
-
-		.goog-te-combo:hover {
-			border-color: #FF8FA3;
-			background-color: #FFE4E9;
-		}
-
-		.goog-te-combo:focus {
-			border-color: #FF8FA3;
-			box-shadow: 0 0 0 3px rgba(255, 179, 193, 0.3);
-		}
-
-		/* Mobile responsive */
-		@media (max-width: 640px) {
-			.max-w-7xl>.flex {
-				flex-wrap: wrap;
-				gap: 8px;
-			}
-
-			#google_translate_element {
-				order: 3;
-				width: 100%;
-				margin-top: 8px;
-			}
-
-			.goog-te-combo {
-				width: 100%;
-			}
-		}
-	</style>
 
 
 	<!-- Main Content -->
