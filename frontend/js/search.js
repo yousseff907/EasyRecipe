@@ -109,7 +109,7 @@ function displayUsers(users) {
 	results.classList.remove('hidden');
 
 	users.forEach(user => {
-		const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
+		const card = document.createElement('div');
 		card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden border border-gray-100';
 		card.onclick = () => window.location.href = `/user/${user.username}`;
 
