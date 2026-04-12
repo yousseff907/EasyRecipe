@@ -26,11 +26,6 @@ async function loadCurrentUsername() {
 async function changeBio() {
 	const newBio = document.getElementById('newBio').value.trim();
 
-	if (!newBio) {
-		showMessage('Please enter a bio', true);
-		return;
-	}
-
 	if (newBio.length > 200) {
 		showMessage('Bio must be less than 200 characters', true);
 		return;
