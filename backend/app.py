@@ -411,7 +411,7 @@ def change_username(request : Username, current_user : User = Depends(get_curren
 
 
 class Bio(BaseModel):
-	string : str = Field(max_length=200)
+	string : str = Field(max_length=200, default="")
 
 @app.post("/api/change_bio")
 def change_bio(request : Bio, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
