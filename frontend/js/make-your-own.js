@@ -107,7 +107,7 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		if (data.status === 'success') {
 			showMessage('Recipe saved successfully! Redirecting...', false);
 			setTimeout(() => {
-				window.location.href = '/recipes';
+				window.location.href = `/recipe?id=${data.recipe_id}`;
 			}, 1500);
 		} else {
 			showMessage(data.detail || 'Failed to save recipe', true);
