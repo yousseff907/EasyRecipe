@@ -57,9 +57,10 @@ async function generateRecipe() {
 		document.getElementById('loading').classList.add('hidden');
 
 		if (data.status === 'success') {
-			currentRecipe = data.recipe;
-			displayRecipe(data.recipe);
-			showMessage('Recipe generated successfully!', false);
+			showMessage('Recipe generated! Redirecting...', false);
+			setTimeout(() => {
+				window.location.href = `/recipe?id=${data.recipe_id}`;
+			}, 1500);
 		} else {
 			document.getElementById('inputForm').classList.remove('hidden');
 			showMessage(data.detail || 'Failed to generate recipe', true);
@@ -82,6 +83,7 @@ function displayRecipe(recipe) {
 	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';
 	document.getElementById('cookTime').textContent = recipe.cook_time ? `${recipe.cook_time} min` : '-';
 	document.getElementById('servings').textContent = recipe.servings || '-';
+	document.getElementById('servingSize').textContent = recipe.serving_size || '-';
 
 	// Ingredients
 	const ingredientsList = document.getElementById('ingredientsList');

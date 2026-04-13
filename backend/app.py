@@ -94,7 +94,8 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		db.refresh(recipe)
 		print(recipe_dictionary)
 		return {"status": "success",
-				"recipe": recipe_dictionary}
+				"recipe": recipe_dictionary,
+				"recipe_id": recipe.id}
 
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))
@@ -351,7 +352,8 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 		db.refresh(recipe)
 		print(recipe_dictionary)
 		return {"status": "success",
-				"recipe": recipe_dictionary}
+				"recipe": recipe_dictionary,
+				"recipe_id": recipe.id}
 
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))

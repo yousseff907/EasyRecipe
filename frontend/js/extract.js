@@ -64,12 +64,14 @@ function extractRecipe() {
 			document.getElementById('loading').classList.add('hidden');
 			document.getElementById('extractBtn').disabled = false;
 
-			if (data && data.status === 'success') {
-				displayRecipe(data.recipe);
-				showMessage('Recipe extracted successfully!', false);
-			} else if (data) {
-				showMessage(data.detail || 'Failed to extract recipe', true);
-			}
+		if (data && data.status === 'success') {
+			showMessage('Recipe extracted! Redirecting...', false);
+			setTimeout(() => {
+				window.location.href = `/recipe?id=${data.recipe_id}`;
+			}, 1500);
+		} else if (data) {
+			showMessage(data.detail || 'Failed to extract recipe', true);
+		}
 		})
 		.catch(error => {
 			document.getElementById('loading').classList.add('hidden');
@@ -77,60 +79,3 @@ function extractRecipe() {
 			showMessage('Error extracting recipe. Please try again.', true);
 		});
 }
-
-// Function: Display extracted recipe
-function displayRecipe(recipe) {
-	document.getElementById('recipeDisplay').classList.remove('hidden');
-
-	// Title
-	document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
-
-	// Times and servings
-	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';
-	document.getElementById('cookTime').textContent = recipe.cook_time ? `${recipe.cook_time} min` : '-';
-	document.getElementById('servings').textContent = recipe.servings || '-';
-	document.getElementById('servingSize').textContent = recipe.serving_size || '-';  // ← ADD THIS
-
-	// Ingredients
-	const ingredientsList = document.getElementById('ingredientsList');
-	ingredientsList.innerHTML = '';
-	if (recipe.ingredients && recipe.ingredients.length > 0) {
-		recipe.ingredients.forEach(ingredient => {
-			const li = document.createElement('li');
-			li.className = 'flex items-start';
-			li.innerHTML = `
-                <span class="text-pink-dark mr-2">•</span>
-                <span class="text-gray-700">${ingredient}</span>
-            `;
-			ingredientsList.appendChild(li);
-		});
-	}
-
-	// Steps
-	const stepsList = document.getElementById('stepsList');
-	stepsList.innerHTML = '';
-	if (recipe.steps && recipe.steps.length > 0) {
-		recipe.steps.forEach((step, index) => {
-			const li = document.createElement('li');
-			li.className = 'flex items-start';
-			li.innerHTML = `
-                <span class="flex-shrink-0 w-8 h-8 bg-pink-dark text-white rounded-full flex items-center justify-center mr-3 font-semibold">
-                    ${index + 1}
-                </span>
-                <span class="text-gray-700 pt-1">${step}</span>
-            `;
-			stepsList.appendChild(li);
-		});
-	}
-
-	// Nutrition data
-	const nutritionBtn = document.getElementById('nutritionBtn');
-	if (recipe.nutrition_per_serving) {
-		nutritionBtn.classList.remove('hidden');
-		displayNutrition(recipe.nutrition_per_serving); // From utils.js
-	} else {
-		nutritionBtn.classList.add('hidden');
-	}
-}
-
-// logout() and showMessage() and toggleNutrition() are now in utils.js - removed from here!
