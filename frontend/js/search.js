@@ -2,7 +2,33 @@ let currentType = 'recipes';
 
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
+	loadFeed();
 });
+
+function loadFeed() {
+	const token = localStorage.getItem('auth_token');
+	fetch('/api/home/feed', {
+		headers: { 'Authorization': `Bearer ${token}` }
+	})
+		.then(r => r.json())
+		.then(data => {
+			document.getElementById('feedLoading').classList.add('hidden');
+			if (!data.recipes || data.recipes.length === 0) {
+				document.getElementById('feedEmpty').classList.remove('hidden');
+				return;
+			}
+			const grid = document.getElementById('feedGrid');
+			grid.classList.remove('hidden');
+			data.recipes.forEach(recipe => {
+				const card = createRecipeCard(recipe, () => window.location.href = `/r/${recipe.id}`);
+				grid.appendChild(card);
+			});
+		})
+		.catch(() => {
+			document.getElementById('feedLoading').classList.add('hidden');
+			document.getElementById('feedEmpty').classList.remove('hidden');
+		});
+}
 
 function setType(type) {
 	currentType = type;
