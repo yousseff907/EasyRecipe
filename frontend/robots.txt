@@ -1,32 +1,32 @@
+# Search engines — full access
 User-agent: Googlebot
-Allow: /r/
-
-User-agent: ClaudeBot
-Allow: /r/
+Allow: /
 
 User-agent: Bingbot
-Allow: /r/
+Allow: /
 
 User-agent: DuckDuckBot
-Allow: /r/
+Allow: /
 
 User-agent: Slurp
-Allow: /r/
+Allow: /
 
 User-agent: Applebot
-Allow: /r/
+Allow: /
 
+# Link preview bots — full access
 User-agent: facebookexternalhit
-Allow: /r/
+Allow: /
 
 User-agent: Twitterbot
-Allow: /r/
+Allow: /
 
 User-agent: LinkedInBot
-Allow: /r/
+Allow: /
 
 User-agent: WhatsApp
-Allow: /r/
+Allow: /
 
+# Block everything else
 User-agent: *
 Disallow: /
