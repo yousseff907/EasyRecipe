@@ -103,12 +103,12 @@ function shareRecipe(recipeId) {
 
 function createRecipeCard(recipe, onclick) {
 	const card = document.createElement('div');
-	card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden';
+	card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden flex flex-col';
 	card.onclick = onclick;
 	card.innerHTML = `
-		<div class="p-6">
-			<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">${recipe.title || 'Untitled Recipe'}</h3>
-			${recipe.owner_username ? `<p class="text-xs text-pink-dark mb-2">by @${recipe.owner_username}</p>` : ''}
+		<div class="p-6 flex-1">
+			<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2 break-words">${recipe.title || 'Untitled Recipe'}</h3>
+			${recipe.owner_username ? `<p class="text-xs text-pink-dark mb-2 truncate">by @${recipe.owner_username}</p>` : ''}
 			<p class="text-xs text-gray-500">
 				Created ${recipe.created_at ? new Date(recipe.created_at + 'Z').toLocaleDateString() : ''}
 			</p>
