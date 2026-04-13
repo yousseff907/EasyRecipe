@@ -1,10 +1,34 @@
-// Check authentication and load recipes
 window.addEventListener('DOMContentLoaded', () => {
-	checkAuth(); // From utils.js
+	checkAuth();
+	loadFavorites();
 	loadRecipes();
 });
 
-// Function: Load all recipes
+function loadFavorites() {
+	const token = localStorage.getItem('auth_token');
+	fetch(`${API_URL}/api/recipes/favorites`, {
+		headers: { 'Authorization': `Bearer ${token}` }
+	})
+		.then(r => r.json())
+		.then(data => {
+			document.getElementById('favoritesLoading').classList.add('hidden');
+			if (!data.recipes || data.recipes.length === 0) {
+				document.getElementById('favoritesEmpty').classList.remove('hidden');
+				return;
+			}
+			const grid = document.getElementById('favoritesGrid');
+			grid.classList.remove('hidden');
+			data.recipes.slice(0, 3).forEach(recipe => {
+				const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
+				grid.appendChild(card);
+			});
+		})
+		.catch(() => {
+			document.getElementById('favoritesLoading').classList.add('hidden');
+			document.getElementById('favoritesEmpty').classList.remove('hidden');
+		});
+}
+
 function loadRecipes() {
 	const token = localStorage.getItem('auth_token');
 
@@ -13,9 +37,7 @@ function loadRecipes() {
 
 	fetch(`${API_URL}/api/recipes`, {
 		method: 'GET',
-		headers: {
-			'Authorization': `Bearer ${token}`
-		}
+		headers: { 'Authorization': `Bearer ${token}` }
 	})
 		.then(response => {
 			if (response.status === 401) {
@@ -27,18 +49,16 @@ function loadRecipes() {
 		})
 		.then(data => {
 			document.getElementById('loading').classList.add('hidden');
-
 			if (data && data.recipes) {
 				displayRecipes(data.recipes);
 			}
 		})
-		.catch(error => {
+		.catch(() => {
 			document.getElementById('loading').classList.add('hidden');
 			showMessage('Failed to load recipes', true);
 		});
 }
 
-// Function: Display recipes in grid
 function displayRecipes(recipes) {
 	const recipesList = document.getElementById('recipesList');
 	const recipesGrid = document.getElementById('recipesGrid');
@@ -56,14 +76,10 @@ function displayRecipes(recipes) {
 
 	recipes.forEach(recipe => {
 		const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
-
 		recipesGrid.appendChild(card);
 	});
 }
 
-// Function: Navigate to recipe detail
 function viewRecipe(recipeId) {
 	window.location.href = `/recipe?id=${recipeId}`;
 }
-
-// logout() and showMessage() are now in utils.js - removed from here!
