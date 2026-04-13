@@ -112,7 +112,7 @@ function displayRecipe(recipe) {
 			li.className = 'flex items-start py-2';
 			li.innerHTML = `
 				<span class="text-pink-dark mr-3 font-bold">•</span>
-				<span class="text-gray-700">${ingredient}</span>
+				<span class="text-gray-700 break-words min-w-0">${ingredient}</span>
 			`;
 			ingredientsList.appendChild(li);
 		});
@@ -129,7 +129,7 @@ function displayRecipe(recipe) {
 				<span class="flex-shrink-0 w-10 h-10 bg-pink-dark text-white rounded-full flex items-center justify-center mr-4 font-bold text-lg">
 					${index + 1}
 				</span>
-				<span class="text-gray-700 pt-2">${step}</span>
+				<span class="text-gray-700 pt-2 break-words min-w-0">${step}</span>
 			`;
 			stepsList.appendChild(li);
 		});
