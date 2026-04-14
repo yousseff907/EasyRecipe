@@ -90,7 +90,7 @@ def send_email(email: str, code: str):
 						<div class="code">{code}</div>
 					</div>
 					<p class="message">
-						This code will expire in <strong>5 minutes</strong>.
+						This code will expire in <strong>20 minutes</strong>.
 					</p>
 					<p style="color: #999; font-size: 14px; margin-top: 30px;">
 						If you didn't request this code, you can safely ignore this email.
