@@ -23,6 +23,11 @@
 			}
 		}
 	</script>
+	<script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/service-worker.js');
+		}
+	</script>
 </head>
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
@@ -90,6 +95,18 @@
 					</svg>
 					AI Recipe Builder
 				</a>
+			</div>
+			<!-- Install Banner -->
+			<div id="installBanner"
+				class="hidden mt-6 pt-6 border-t border-pink-light flex items-center justify-between gap-4">
+				<div>
+					<p class="font-semibold text-gray-800 text-sm">Install EasyRecipe</p>
+					<p class="text-xs text-gray-500">Add to your home screen for quick access</p>
+				</div>
+				<button id="installBtn"
+					class="flex-shrink-0 bg-pink-dark hover:bg-pink-medium text-white font-semibold px-4 py-2 rounded-lg transition text-sm">
+					Install
+				</button>
 			</div>
 		</div>
 

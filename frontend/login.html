@@ -24,6 +24,11 @@
 		}
 	</script>
 	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+	<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js');
+		}
+	</script>
 </head>
 
 <!-- AFTER (correct) -->

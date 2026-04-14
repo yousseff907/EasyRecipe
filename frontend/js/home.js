@@ -1,9 +1,30 @@
 window.addEventListener('DOMContentLoaded', () => {
-	checkAuth();
-	loadUserInfo();
-	loadMyRecipes();
-	loadMyFavorites();
-	loadFeed();
+    checkAuth();
+    loadUserInfo();
+    loadMyRecipes();
+    loadMyFavorites();
+    loadFeed();
+
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBanner').classList.remove('hidden');
+    });
+
+    document.getElementById('installBtn').addEventListener('click', () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+            deferredPrompt = null;
+            document.getElementById('installBanner').classList.add('hidden');
+        });
+    });
+
+    window.addEventListener('appinstalled', () => {
+        document.getElementById('installBanner').classList.add('hidden');
+    });
 });
 
 function loadUserInfo() {
