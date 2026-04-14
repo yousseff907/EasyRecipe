@@ -36,6 +36,7 @@ const STATIC_ASSETS = [
 	'/js/profile.js',
 	'/js/login.js',
 	'/favicon.ico',
+	'/output.css'
 ];
 
 // Install — cache static assets

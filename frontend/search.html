@@ -9,23 +9,10 @@
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 	<link rel="manifest" href="/site.webmanifest">
-	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/output.css">
 	<script>
-		tailwind.config = {
-			theme: {
-				extend: {
-					colors: {
-						'pink-light': '#FFE4E9',
-						'pink-medium': '#FFB3C1',
-						'pink-dark': '#FF8FA3',
-					}
-				}
-			}
-		}
-	</script>
-	<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js');
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/service-worker.js');
 		}
 	</script>
 </head>
