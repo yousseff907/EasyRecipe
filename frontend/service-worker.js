@@ -15,7 +15,6 @@ const STATIC_ASSETS = [
 	'/js/utils.js',
 	'/js/home.js',
 	'/js/recipes.js',
-	'/js/favorites.js',
 	'/js/recipe.js',
 	'/js/search.js',
 	'/js/settings.js',
@@ -27,7 +26,16 @@ const STATIC_ASSETS = [
 	'/apple-touch-icon.png',
 	'/favicon-32x32.png',
 	'/favicon-16x16.png',
-	'/site.webmanifest'
+	'/site.webmanifest',
+	'/contact',
+	'/terms',
+	'/edit',
+	'/user/',
+	'/js/edit.js',
+	'/js/favorites.js',
+	'/js/profile.js',
+	'/js/login.js',
+	'/favicon.ico',
 ];
 
 // Install — cache static assets
@@ -98,7 +106,7 @@ self.addEventListener('message', event => {
 					headers: { 'Authorization': `Bearer ${token}` }
 				}).then(response => {
 					if (response.ok) cache.put(url, response);
-				}).catch(() => {});
+				}).catch(() => { });
 			});
 		});
 	}
