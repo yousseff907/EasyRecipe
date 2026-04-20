@@ -72,7 +72,7 @@ function verifyCode() {
 				showMessage('Login successful! Redirecting...', false);
 				// Redirect to extract page
 				setTimeout(() => {
-					window.location.href = '/extract';
+					window.location.href = '/home';
 				}, 1000);
 			} else {
 				showMessage(data.detail || 'Invalid code', true);
