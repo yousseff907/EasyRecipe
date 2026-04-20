@@ -8,10 +8,8 @@ window.addEventListener('DOMContentLoaded', () => {
 	// iOS guide
 	const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 	const isStandalone = window.navigator.standalone;
-	const iosShown = localStorage.getItem('iosGuideShown');
-	if (isIOS && !isStandalone && !iosShown) {
+	if (isIOS && !isStandalone) {
 		document.getElementById('iosGuide').classList.remove('hidden');
-		localStorage.setItem('iosGuideShown', 'true');
 	}
 
 	// Android install
