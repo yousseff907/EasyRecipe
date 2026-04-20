@@ -4,7 +4,12 @@ const API_URL = '';
 
 // Check authentication and redirect if not logged in
 function checkAuth() {
-	const token = localStorage.getItem('auth_token');
+	let token = localStorage.getItem('auth_token');
+	if (!token) {
+		const match = document.cookie.match(/auth_token=([^;]+)/);
+		token = match ? match[1] : null;
+		if (token) localStorage.setItem('auth_token', token);
+	}
 	if (!token) {
 		window.location.href = '/login';
 		return false;
@@ -30,6 +35,7 @@ document.addEventListener('click', (e) => {
 // Logout function
 function logout() {
 	localStorage.removeItem('auth_token');
+	document.cookie = 'auth_token=; path=/; max-age=0';
 	window.location.href = '/login';
 }
 

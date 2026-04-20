@@ -1,30 +1,39 @@
 window.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
-    loadUserInfo();
-    loadMyRecipes();
-    loadMyFavorites();
-    loadFeed();
+	checkAuth();
+	loadUserInfo();
+	loadMyRecipes();
+	loadMyFavorites();
+	loadFeed();
 
-    let deferredPrompt = null;
+	// iOS guide
+	const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+	const isStandalone = window.navigator.standalone;
+	const iosShown = localStorage.getItem('iosGuideShown');
+	if (isIOS && !isStandalone && !iosShown) {
+		document.getElementById('iosGuide').classList.remove('hidden');
+		localStorage.setItem('iosGuideShown', 'true');
+	}
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installBanner').classList.remove('hidden');
-    });
+	// Android install
+	let deferredPrompt = null;
+	window.addEventListener('beforeinstallprompt', (e) => {
+		e.preventDefault();
+		deferredPrompt = e;
+		document.getElementById('installBanner').classList.remove('hidden');
+	});
 
-    document.getElementById('installBtn').addEventListener('click', () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-            deferredPrompt = null;
-            document.getElementById('installBanner').classList.add('hidden');
-        });
-    });
+	document.getElementById('installBtn').addEventListener('click', () => {
+		if (!deferredPrompt) return;
+		deferredPrompt.prompt();
+		deferredPrompt.userChoice.then(() => {
+			deferredPrompt = null;
+			document.getElementById('installBanner').classList.add('hidden');
+		});
+	});
 
-    window.addEventListener('appinstalled', () => {
-        document.getElementById('installBanner').classList.add('hidden');
-    });
+	window.addEventListener('appinstalled', () => {
+		document.getElementById('installBanner').classList.add('hidden');
+	});
 });
 
 function loadUserInfo() {
@@ -38,7 +47,7 @@ function loadUserInfo() {
 				document.getElementById('welcomeMsg').textContent = `Welcome back, ${data.username}!`;
 			}
 		})
-		.catch(() => {});
+		.catch(() => { });
 }
 
 function loadMyRecipes() {

@@ -68,6 +68,7 @@ function verifyCode() {
 			if (data.token) {
 				// Save token to browser storage
 				localStorage.setItem('auth_token', data.token);
+				document.cookie = `auth_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
 				showMessage('Login successful! Redirecting...', false);
 				// Redirect to extract page
 				setTimeout(() => {
@@ -126,9 +127,14 @@ function loadFeed() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	const token = localStorage.getItem('auth_token');
-	if (token) {
-		window.location.href = '/home';
-	}
-	loadFeed();
+    let token = localStorage.getItem('auth_token');
+    if (!token) {
+        const match = document.cookie.match(/auth_token=([^;]+)/);
+        token = match ? match[1] : null;
+        if (token) localStorage.setItem('auth_token', token);
+    }
+    if (token) {
+        window.location.href = '/home';
+    }
+    loadFeed();
 });
