@@ -619,3 +619,11 @@ def get_user_feed(db : Session = Depends(get_db), _ : User = Depends(get_current
 				"owner_username": owner.username
 			})
 	return {"recipes": recipe_list}
+
+@app.get("/api/public/recipes")
+def get_all_public_recipes(db : Session = Depends(get_db)):
+	recipes = db.query(Recipe).filter(Recipe.is_public == True).all()
+	recipe_list = []
+	for r in recipes:
+		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": r.owner.username})
+	return {"recipes" : recipe_list}
