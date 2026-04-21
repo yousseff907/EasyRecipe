@@ -27,7 +27,7 @@ function requestCode() {
 		.then(response => response.json())
 		.then(data => {
 			if (data.message) {
-				showMessage('Verification code sent to your email!', false);
+				showMessage('Verification code sent! Check your inbox or spam folder if you don\'t see it.', false);
 				document.getElementById('emailForm').classList.add('hidden');
 				document.getElementById('codeForm').classList.remove('hidden');
 			} else {
@@ -37,7 +37,7 @@ function requestCode() {
 		})
 		.catch(error => {
 			turnstile.reset();
-			showMessage('Network error. Make sure backend is running.', true);
+			showMessage('Network error. Please try again.', true);
 		});
 }
 

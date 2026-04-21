@@ -10,6 +10,7 @@ function startProgressMessages() {
 		{ text: "Transcribing speech...", delay: 18000 },
 		{ text: "Analyzing recipe with AI...", delay: 30000 },
 		{ text: "Almost done...", delay: 50000 },
+		{ text: "This is taking longer than usual, please wait...", delay: 60000},
 	];
 
 	messages.forEach(({ text, delay }) => {
@@ -76,6 +77,6 @@ function extractRecipe() {
 		.catch(error => {
 			document.getElementById('loading').classList.add('hidden');
 			document.getElementById('extractBtn').disabled = false;
-			showMessage('Error extracting recipe. Please try again.', true);
+			showMessage('Extraction may have timed out. Check your library - your recipe might have been saved.', true);
 		});
 }
