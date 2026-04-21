@@ -75,7 +75,6 @@ function loadUserRecipes(username, token) {
 
 			data.recipes.forEach(recipe => {
 				const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
-				card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden border border-gray-100';
 				card.onclick = () => window.location.href = `/recipe?id=${recipe.id}&username=${username}`;
 
 				grid.appendChild(card);

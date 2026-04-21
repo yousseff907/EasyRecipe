@@ -56,8 +56,6 @@ function displayRecipes(recipes) {
 
 	recipes.forEach(recipe => {
 		const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
-		card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden';
-		card.onclick = () => viewRecipe(recipe.id);
 
 		recipesGrid.appendChild(card);
 	});
