@@ -17,8 +17,10 @@ from utils.auth import get_current_user
 from services.moderation_service import moderate_content
 from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
 import httpx
-from config import TURNSTILE_SECRET_KEY
+from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID
 from fastapi.templating import Jinja2Templates
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 def	delete_file(path: str):
 	try:
@@ -209,7 +211,10 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 			db.refresh(verification)
 			user = db.query(User).filter(User.email == request.email).first()
 			if not user:
-				user = User(email = request.email, username = request.email.split('@')[0])
+				username = request.email.split('@')[0]
+				while db.query(User).filter(User.username == username).first():
+					username = username + str(secrets.randbelow(99990))
+				user = User(email = request.email, username = username)
 				db.add(user)
 				db.commit()
 				db.refresh(user)
@@ -627,3 +632,25 @@ def get_all_public_recipes(db : Session = Depends(get_db)):
 	for r in recipes:
 		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": r.owner.username})
 	return {"recipes" : recipe_list}
+
+class GoogleAuth(BaseModel):
+	token : str
+
+@app.post("/api/auth/google")
+def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
+	try:
+		idinfo = id_token.verify_oauth2_token(body.token, google_requests.Request(), GOOGLE_CLIENT_ID)
+		email = idinfo['email']
+		user = db.query(User).filter(User.email == email).first()
+		if not user:
+			username = email.split('@')[0]
+			while db.query(User).filter(User.username == username).first():
+				username = username + str(secrets.randbelow(99990))
+			user = User(email = email, username = username)
+			db.add(user)
+			db.commit()
+			db.refresh(user)
+		token = jwt_helper.create_jwt_token(user.id, user.email)
+		return {"status": "success", "token": token}
+	except Exception as e:
+		raise HTTPException(status_code=400, detail="Invalid Google token")

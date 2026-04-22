@@ -4,21 +4,47 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login - EasyRecipe </title>
+	<title>Login - EasyRecipe</title>
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 	<link rel="manifest" href="/site.webmanifest">
 	<link rel="stylesheet" href="/output.css">
 	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
 	<script>
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.register('/service-worker.js');
 		}
+
+		function handleGoogleSignIn(response) {
+			fetch('/api/auth/google', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ token: response.credential })
+			})
+				.then(r => r.json())
+				.then(data => {
+					if (data.token) {
+						localStorage.setItem('auth_token', data.token);
+						document.cookie = `auth_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+						window.location.href = '/home';
+					} else {
+						const msgDiv = document.getElementById('message');
+						msgDiv.textContent = data.detail || 'Google sign in failed';
+						msgDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700';
+						msgDiv.classList.remove('hidden');
+					}
+				})
+				.catch(() => {
+					const msgDiv = document.getElementById('message');
+					msgDiv.textContent = 'Network error. Please try again.';
+					msgDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700';
+					msgDiv.classList.remove('hidden');
+				});
+		}
 	</script>
 </head>
-
-<!-- AFTER (correct) -->
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
 	<header class="bg-white shadow-sm">
@@ -33,7 +59,31 @@
 			<!-- Header Inside Card -->
 			<div class="text-center mb-8">
 				<h2 class="text-3xl font-bold text-pink-dark mb-2">Welcome Back</h2>
-				<p class="text-gray-600">Sign in to your account</p>
+				<p class="text-gray-600">Sign in or create an account</p>
+			</div>
+
+			<!-- Google Sign In -->
+			<div class="mb-6 flex justify-center">
+				<div id="g_id_onload"
+					data-client_id="554336548817-c9028s0dop598osktjqvmi7e524kpdag.apps.googleusercontent.com"
+					data-callback="handleGoogleSignIn"
+					data-auto_prompt="false">
+				</div>
+				<div class="g_id_signin"
+					data-type="standard"
+					data-size="large"
+					data-theme="outline"
+					data-text="continue_with"
+					data-shape="rectangular"
+					data-logo_alignment="left">
+				</div>
+			</div>
+
+			<!-- Divider -->
+			<div class="flex items-center gap-4 mb-6">
+				<div class="flex-1 border-t border-gray-200"></div>
+				<span class="text-sm text-gray-400">or continue with email</span>
+				<div class="flex-1 border-t border-gray-200"></div>
 			</div>
 
 			<!-- Email Form (Step 1) -->
@@ -82,8 +132,7 @@
 		<div class="relative">
 			<div id="feedContainer" class="space-y-3 max-h-48 overflow-y-auto pb-6"
 				style="scrollbar-width: none; -ms-overflow-style: none;"></div>
-			<div
-				class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none">
+			<div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none">
 			</div>
 		</div>
 	</div>
@@ -101,9 +150,6 @@
 		</div>
 	</footer>
 
-
-
-	<!-- Custom Styling -->
 	<style>
 		#feedContainer::-webkit-scrollbar {
 			display: none;
@@ -112,5 +158,4 @@
 
 	<script src="/js/login.js"></script>
 </body>
-
 </html>

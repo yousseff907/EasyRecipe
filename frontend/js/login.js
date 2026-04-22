@@ -1,7 +1,5 @@
-// API Base URL - change this if deploying to production
 const API_URL = '';
 
-// Function 1: Request verification code
 function requestCode() {
 	const email = document.getElementById('email').value;
 	const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
@@ -19,9 +17,7 @@ function requestCode() {
 
 	fetch(`${API_URL}/api/auth/request-code`, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ email: email, turnstile_token: turnstileToken })
 	})
 		.then(response => response.json())
@@ -35,42 +31,32 @@ function requestCode() {
 				showMessage(data.detail || 'Failed to send code', true);
 			}
 		})
-		.catch(error => {
+		.catch(() => {
 			turnstile.reset();
 			showMessage('Network error. Please try again.', true);
 		});
 }
 
-// Function 2: Verify code and login
 function verifyCode() {
 	const email = document.getElementById('email').value;
 	const code = document.getElementById('code').value;
 
-	// Validate
 	if (!code || code.length !== 6) {
 		showMessage('Please enter the 6-digit code', true);
 		return;
 	}
 
-	// Call backend
 	fetch(`${API_URL}/api/auth/submit-code`, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			email: email,
-			otp: code
-		})
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ email: email, otp: code })
 	})
 		.then(response => response.json())
 		.then(data => {
 			if (data.token) {
-				// Save token to browser storage
 				localStorage.setItem('auth_token', data.token);
 				document.cookie = `auth_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
 				showMessage('Login successful! Redirecting...', false);
-				// Redirect to extract page
 				setTimeout(() => {
 					window.location.href = '/home';
 				}, 1000);
@@ -78,19 +64,17 @@ function verifyCode() {
 				showMessage(data.detail || 'Invalid code', true);
 			}
 		})
-		.catch(error => {
+		.catch(() => {
 			showMessage('Verification failed. Please try again.', true);
 		});
 }
 
-// Function 3: Back to email input
 function backToEmail() {
 	document.getElementById('emailForm').classList.remove('hidden');
 	document.getElementById('codeForm').classList.add('hidden');
 	document.getElementById('code').value = '';
 }
 
-// Helper: Show message to user
 function showMessage(text, isError) {
 	const msgDiv = document.getElementById('message');
 	msgDiv.textContent = text;
@@ -123,18 +107,18 @@ function loadFeed() {
 				container.appendChild(card);
 			});
 		})
-		.catch(() => { });
+		.catch(() => {});
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    let token = localStorage.getItem('auth_token');
-    if (!token) {
-        const match = document.cookie.match(/auth_token=([^;]+)/);
-        token = match ? match[1] : null;
-        if (token) localStorage.setItem('auth_token', token);
-    }
-    if (token) {
-        window.location.href = '/home';
-    }
-    loadFeed();
+	let token = localStorage.getItem('auth_token');
+	if (!token) {
+		const match = document.cookie.match(/auth_token=([^;]+)/);
+		token = match ? match[1] : null;
+		if (token) localStorage.setItem('auth_token', token);
+	}
+	if (token) {
+		window.location.href = '/home';
+	}
+	loadFeed();
 });
