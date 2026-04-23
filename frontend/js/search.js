@@ -20,7 +20,7 @@ function loadFeed() {
 			const grid = document.getElementById('feedGrid');
 			grid.classList.remove('hidden');
 			data.recipes.forEach(recipe => {
-				const card = createRecipeCard(recipe, () => window.location.href = `/r/${recipe.id}`);
+				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}`);
 				grid.appendChild(card);
 			});
 		})
