@@ -178,6 +178,9 @@ function displayRecipe(recipe) {
 	} else if (backBtn && from === 'search') {
 		backBtn.href = '/search';
 		backBtn.textContent = '← Back to Search';
+	} else if (backBtn && from === 'home') {
+		backBtn.href = '/home';
+		backBtn.textContent = '← Back to Home';
 	} else if (backBtn) {
 		backBtn.textContent = '← Back to Recipes';
 	}

@@ -63,7 +63,7 @@ function loadMyRecipes() {
 			const grid = document.getElementById('myRecipesGrid');
 			grid.classList.remove('hidden');
 			data.recipes.slice(0, 3).forEach(recipe => {
-				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}`);
+				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}&from=home`);
 				grid.appendChild(card);
 			});
 		})
@@ -88,7 +88,7 @@ function loadMyFavorites() {
 			const grid = document.getElementById('myFavoritesGrid');
 			grid.classList.remove('hidden');
 			data.recipes.slice(0, 3).forEach(recipe => {
-				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}`);
+				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}&from=home`);
 				grid.appendChild(card);
 			});
 		})
@@ -113,7 +113,7 @@ function loadFeed() {
 			const grid = document.getElementById('feedGrid');
 			grid.classList.remove('hidden');
 			data.recipes.forEach(recipe => {
-				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}`);
+				const card = createRecipeCard(recipe, () => window.location.href = `/recipe?id=${recipe.id}&from=home`);
 				grid.appendChild(card);
 			});
 		})
