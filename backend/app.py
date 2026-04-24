@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from services.video_audio_downloader import *
 from services.audio_extractor import extract_transcript
@@ -21,6 +21,7 @@ from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID
 from fastapi.templating import Jinja2Templates
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from weasyprint import HTML
 
 def	delete_file(path: str):
 	try:
@@ -654,3 +655,298 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 		return {"status": "success", "token": token}
 	except Exception as e:
 		raise HTTPException(status_code=400, detail="Invalid Google token")
+
+
+
+
+
+@app.get("/api/recipes/{recipe_id}/pdf")
+def download_pdf(recipe_id : int, db : Session = Depends(get_db)):
+	html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            color: #1f2937;
+        }
+
+        .header {
+            border-bottom: 3px solid #FF8FA3;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            font-size: 14px;
+            color: #FF8FA3;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            color: #1f2937;
+        }
+
+        .owner {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .owner span {
+            color: #FF8FA3;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .info-box {
+            background: #FFE4E9;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF8FA3;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 0 0 12px 0;
+            border-left: 4px solid #FF8FA3;
+            padding-left: 10px;
+        }
+
+        .ingredients {
+            background: #FFE4E9;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+        }
+
+        .ingredients ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ingredients li {
+            padding: 6px 0;
+            border-bottom: 1px solid #FFB3C1;
+            font-size: 14px;
+        }
+
+        .ingredients li:last-child {
+            border-bottom: none;
+        }
+
+        .ingredients li::before {
+            content: "• ";
+            color: #FF8FA3;
+            font-weight: bold;
+        }
+
+        .steps ol {
+            padding-left: 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .steps li {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .step-number {
+            background: #FF8FA3;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            padding-top: 6px;
+            line-height: 1.6;
+        }
+
+        .nutrition {
+            background: linear-gradient(to right, #FFE4E9, white);
+            border: 2px solid #FFB3C1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 32px;
+        }
+
+        .nutrition h2 {
+            border: none;
+            padding-left: 0;
+            margin-bottom: 4px;
+        }
+
+        .nutrition-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .nutrition-box {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .nutrition-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .nutrition-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF8FA3;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 1px solid #FFB3C1;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">EasyRecipe</div>
+        <h1>{title}</h1>
+        <div class="owner">by <span>@{owner_username}</span></div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-box">
+            <div class="info-label">Prep Time</div>
+            <div class="info-value">{prep_time}</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">Cook Time</div>
+            <div class="info-value">{cook_time}</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">Servings</div>
+            <div class="info-value">{servings}</div>
+        </div>
+        <div class="info-box">
+            <div class="info-label">Serving Size</div>
+            <div class="info-value">{serving_size}</div>
+        </div>
+    </div>
+
+    <h2>Ingredients</h2>
+    <div class="ingredients">
+        <ul>
+            {ingredients_html}
+        </ul>
+    </div>
+
+    <div class="steps">
+        <h2>Instructions</h2>
+        <ol>
+            {steps_html}
+        </ol>
+    </div>
+
+    {nutrition_html}
+
+    <div class="footer">
+        Generated by EasyRecipe · easyrecipe.online
+    </div>
+</body>
+</html>"""
+	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, Recipe.is_public == True).first()
+	if not recipe:
+		raise HTTPException(status_code=404, detail="Recipe not found")
+
+	owner = db.query(User).filter(User.id == recipe.user_id).first()
+	ingredients = json.loads(recipe.ingredients)
+	steps = json.loads(recipe.steps)
+	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
+
+	ingredients_html = ''.join([f'<li>{i}</li>' for i in ingredients])
+
+	steps_html = ''.join([
+		f'<li><div class="step-number">{idx+1}</div><div class="step-text">{step}</div></li>'
+		for idx, step in enumerate(steps)
+	])
+
+	if nutrition:
+		nutrition_html = f"""
+		<div class="nutrition">
+			<h2>Nutritional Facts</h2>
+			<div class="nutrition-subtitle">(per serving, estimated)</div>
+			<div class="nutrition-grid">
+				<div class="nutrition-box"><div class="nutrition-label">Calories</div><div class="nutrition-value">{nutrition.get('calories', '-')}</div></div>
+				<div class="nutrition-box"><div class="nutrition-label">Protein</div><div class="nutrition-value">{nutrition.get('protein_g', '-')}g</div></div>
+				<div class="nutrition-box"><div class="nutrition-label">Carbs</div><div class="nutrition-value">{nutrition.get('carbs_g', '-')}g</div></div>
+				<div class="nutrition-box"><div class="nutrition-label">Fat</div><div class="nutrition-value">{nutrition.get('fat_g', '-')}g</div></div>
+			</div>
+		</div>"""
+	else:
+		nutrition_html = ''
+
+	html_content = html_content \
+		.replace('{title}', recipe.title) \
+		.replace('{owner_username}', owner.username) \
+		.replace('{prep_time}', f"{recipe.prep_time} min" if recipe.prep_time else '-') \
+		.replace('{cook_time}', f"{recipe.cook_time} min" if recipe.cook_time else '-') \
+		.replace('{servings}', str(recipe.servings) if recipe.servings else '-') \
+		.replace('{serving_size}', recipe.serving_size if recipe.serving_size else '-') \
+		.replace('{ingredients_html}', ingredients_html) \
+		.replace('{steps_html}', steps_html) \
+		.replace('{nutrition_html}', nutrition_html)
+
+	pdf = HTML(string=html_content).write_pdf()
+
+	return Response(content=pdf, media_type="application/pdf", headers={
+		"Content-Disposition": f"attachment; filename=recipe.pdf"
+	})

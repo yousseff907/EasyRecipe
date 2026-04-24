@@ -19,29 +19,6 @@
 			navigator.serviceWorker.register('/service-worker.js');
 		}
 	</script>
-	<style>
-		@media print {
-
-			header,
-			footer,
-			.no-print {
-				display: none !important;
-			}
-
-			body {
-				background: white !important;
-			}
-
-			main {
-				max-width: 100% !important;
-				padding: 0 !important;
-			}
-
-			.bg-white {
-				box-shadow: none !important;
-			}
-		}
-	</style>
 </head>
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
@@ -75,8 +52,7 @@
 					Share
 				</button>
 
-				<!-- Download PDF Button -->
-				<button onclick="window.print()"
+				<button onclick="downloadPDF()"
 					class="w-full sm:w-auto border-2 border-pink-dark text-pink-dark hover:bg-pink-light font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
 					<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
 						stroke="currentColor" stroke-width="2">
@@ -211,10 +187,23 @@
 	</footer>
 
 	<script>
-		// Auto print if ?print=true
-		const urlParams = new URLSearchParams(window.location.search);
-		if (urlParams.get('print') === 'true') {
-			window.addEventListener('load', () => window.print());
+		function downloadPDF() {
+			fetch('/api/recipes/{{ recipe_id }}/pdf')
+				.then(response => {
+					if (!response.ok) throw new Error('Failed');
+					return response.blob();
+				})
+				.then(blob => {
+					const url = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = 'recipe.pdf';
+					document.body.appendChild(a);
+					a.click();
+					window.URL.revokeObjectURL(url);
+					document.body.removeChild(a);
+				})
+				.catch(() => alert('Failed to generate PDF'));
 		}
 
 		// Copy share link

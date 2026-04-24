@@ -199,8 +199,30 @@ function shareRecipe() {
 }
 
 function downloadPDF() {
-	const recipeId = window.currentRecipeId;
-	window.open(`https://www.easyrecipe.online/r/${recipeId}?print=true`, '_blank');
+    const recipeId = window.currentRecipeId;
+    const token = localStorage.getItem('auth_token');
+    
+    showMessage('Generating PDF...', false);
+    
+    fetch(`/api/recipes/${recipeId}/pdf`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'recipe.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showMessage('PDF downloaded!', false);
+        })
+        .catch(() => showMessage('Failed to generate PDF', true));
 }
 
 // Helper: Update privacy button text and style (never touches hidden class)
