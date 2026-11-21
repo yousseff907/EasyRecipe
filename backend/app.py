@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Request
-from fastapi.responses import FileResponse, Response
-from pydantic import BaseModel, Field
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, JSONResponse, Response
+from pydantic import AfterValidator, BaseModel, Field
+from typing import Annotated
+import logging
 from services.video_audio_downloader import *
 from services.audio_extractor import extract_transcript
 import os
@@ -16,12 +19,14 @@ from utils import jwt_helper
 import json
 from utils.auth import get_current_user
 from services.moderation_service import moderate_content
-from fastapi.middleware.cors import CORSMiddleware  # ← ADD THIS
+from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID
+from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID, CORS_ORIGINS
+from models.account_feedback import AccountFeedback
 from fastapi.templating import Jinja2Templates
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from google.auth.exceptions import GoogleAuthError
 from weasyprint import HTML
 
 # Usernames end up in URLs and HTML, so only allow a safe set of characters.
@@ -42,23 +47,55 @@ def	delete_file(path: str):
 	except FileNotFoundError:
 		pass
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("easyrecipe")
+
+def server_error(message: str) -> HTTPException:
+	# Log the real exception (with traceback) on the server and send the client
+	# a generic message, so internal details never leak in API responses.
+	# Call this from inside an `except` block.
+	logger.exception(message)
+	return HTTPException(status_code=500, detail=message)
+
+def normalize_email(value: str) -> str:
+	value = value.strip().lower()
+	if len(value) > 254 or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", value):
+		raise ValueError("Invalid email address")
+	return value
+
+Email = Annotated[str, AfterValidator(normalize_email)]
+RecipeTitle = Annotated[str, Field(min_length=1, max_length=200)]
+RecipeLine = Annotated[str, Field(max_length=2000)]
+
 app = FastAPI()
 
-app.add_middleware(
-	CORSMiddleware,
-	allow_origins=["*"],
-	allow_credentials=True,
-	allow_methods=["*"],
-	allow_headers=["*"],
-)
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+	# The frontend shows `detail` as text, so return one readable sentence
+	# instead of FastAPI's default list of error objects.
+	error = exc.errors()[0]
+	field = " ".join(str(part) for part in error["loc"][1:]) or "request"
+	message = error["msg"].removeprefix("Value error, ")
+	return JSONResponse(status_code=422, content={"detail": f"Invalid {field}: {message}"})
+
+# The bundled frontend is served from the same origin as the API, so CORS is off
+# by default. Set CORS_ORIGINS (comma-separated) only if you host the frontend elsewhere.
+if CORS_ORIGINS:
+	app.add_middleware(
+		CORSMiddleware,
+		allow_origins=CORS_ORIGINS,
+		allow_credentials=False,
+		allow_methods=["GET", "POST", "PATCH", "DELETE"],
+		allow_headers=["Authorization", "Content-Type"],
+	)
 
 class VideoRequest(BaseModel):
-	url: str
+	url: str = Field(max_length=500)
 	instructions: str = Field(default="", max_length=300)
 
 class VerificationCode(BaseModel):
-	otp: str
-	email: str
+	otp: str = Field(max_length=6)
+	email: Email
 
 @app.post("/api/extract")
 def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user), db = Depends(get_db)):
@@ -114,11 +151,14 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 				"recipe": recipe_dictionary,
 				"recipe_id": recipe.id}
 
+	except HTTPException:
+		raise
+
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))
 
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	except Exception:
+		raise server_error("Could not process this video. Please try another link.")
 
 
 @app.get("/api/recipes/{recipe_id}/download-video")
@@ -143,12 +183,12 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))
 
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	except Exception:
+		raise server_error("Could not download this video. Please try again later.")
 
 
 class LoginRequest(BaseModel):
-	email: str
+	email: Email
 	turnstile_token : str
 
 @app.post("/api/auth/request-code")
@@ -191,8 +231,8 @@ async def	login(body: LoginRequest, request : Request, db : Session = Depends(ge
 		return {"message": "Code sent"}
 	except HTTPException:
 		raise
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	except Exception:
+		raise server_error("Could not send the code. Please try again later.")
 
 @app.post("/api/auth/submit-code")
 def	verify(request: VerificationCode, db : Session = Depends(get_db)):
@@ -236,8 +276,8 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 			token = jwt_helper.create_jwt_token(user.id, user.email)
 	except HTTPException:
 		raise
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	except Exception:
+		raise server_error("Could not verify the code. Please try again later.")
 	return {"status" : "success", "token" : token}
 
 @app.get("/api/recipes")
@@ -301,13 +341,13 @@ class NutritionInput(BaseModel):
 	fat_g: int | None = None
 
 class SelfMadeRecipe(BaseModel):
-	title : str
-	ingredients : list[str] = Field(max_length=100)
-	steps : list[str] = Field(max_length=50)
+	title : RecipeTitle
+	ingredients : list[RecipeLine] = Field(max_length=100)
+	steps : list[RecipeLine] = Field(max_length=50)
 	prep_time : int | None = None
 	cook_time : int | None = None
 	servings : int | None = None
-	serving_size : str | None = None
+	serving_size : str | None = Field(default=None, max_length=50)
 	nutrition : NutritionInput | None = None
 
 @app.post("/api/make_your_own")
@@ -334,21 +374,23 @@ def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_
 		db.commit()
 		db.refresh(recipe)
 		return {"status": "success", "recipe_id": recipe.id}
-	except Exception as e:
+	except HTTPException:
+		raise
+	except Exception:
 		db.rollback()
-		raise HTTPException(status_code=500, detail=f"Failed to create recipe: {str(e)}")
+		raise server_error("Could not create the recipe. Please try again later.")
 
 
 class AIRecipe(BaseModel):
-	ingredients : list[str] = Field(max_length=100)
-	instructions : str
+	ingredients : list[Annotated[str, Field(max_length=200)]] = Field(max_length=100)
+	instructions : str = Field(default="", max_length=300)
 
 @app.post("/api/make_your_own_with_ai")
 def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
 	try:
 		recipe_dictionary = build_ai_recipe(request.instructions, request.ingredients)
 		if recipe_dictionary == None:
-			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
+			raise HTTPException(status_code=400, detail="Could not build a recipe from this request. Please check your ingredients and instructions.")
 
 		unsafe_content = moderate_content(title=recipe_dictionary.get("title"),
 										ingredients = recipe_dictionary.get("ingredients", []),
@@ -375,11 +417,14 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 				"recipe": recipe_dictionary,
 				"recipe_id": recipe.id}
 
+	except HTTPException:
+		raise
+
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))
 
-	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+	except Exception:
+		raise server_error("Could not generate a recipe. Please try again later.")
 
 
 class Feedback(BaseModel):
@@ -393,15 +438,19 @@ def delete_account(request : Feedback, current_user : User = Depends(get_current
 			raise HTTPException(status_code=400, detail=(f"Feedback content violates our community guidelines. "
 								f"Please review and remove inappropriate content"))
 
-		with open("feedback.txt", '+a') as f:
-			f.write(request.feedback+'\n')
+		# Stored anonymously (no user id or email) since the account is being deleted.
+		if request.feedback.strip():
+			db.add(AccountFeedback(feedback=request.feedback.strip()))
 		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
 		db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id).delete()
 		db.delete(current_user)
 		db.commit()
 		return {"message": "Account deleted successfully"}
-	except Exception as e:
-		raise HTTPException(status_code=404, detail=str(e))
+	except HTTPException:
+		raise
+	except Exception:
+		db.rollback()
+		raise server_error("Could not delete the account. Please try again later.")
 
 @app.get("/api/user/me")
 def get_current_user_info(current_user: User = Depends(get_current_user), db : Session = Depends(get_db)):
@@ -579,13 +628,14 @@ def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 		raise
 
 class RecipeEdit(BaseModel):
-	title: str
-	ingredients: list[str]
-	steps: list[str]
+	# Same limits as SelfMadeRecipe
+	title: RecipeTitle
+	ingredients: list[RecipeLine] = Field(max_length=100)
+	steps: list[RecipeLine] = Field(max_length=50)
 	prep_time: int | None = None
 	cook_time: int | None = None
 	servings: int | None = None
-	serving_size: str | None = None
+	serving_size: str | None = Field(default=None, max_length=50)
 	nutrition: NutritionInput | None = None
 
 @app.patch("/api/recipes/{id}/edit")
@@ -613,8 +663,9 @@ def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), 
 		return {"status" : "success"}
 	except HTTPException:
 		raise
-	except Exception as e:
-		raise HTTPException(status_code=500)
+	except Exception:
+		db.rollback()
+		raise server_error("Could not save the recipe. Please try again later.")
 	
 @app.get("/api/feed")
 def get_feed(db : Session = Depends(get_db)):
@@ -644,7 +695,15 @@ class GoogleAuth(BaseModel):
 def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 	try:
 		idinfo = id_token.verify_oauth2_token(body.token, google_requests.Request(), GOOGLE_CLIENT_ID)
-		email = idinfo['email']
+	except (ValueError, GoogleAuthError):
+		raise HTTPException(status_code=400, detail="Invalid Google token")
+	except Exception:
+		raise server_error("Could not sign in with Google. Please try again later.")
+	# Only trust emails Google has verified, otherwise anyone could claim an address.
+	if not idinfo.get('email_verified') or not idinfo.get('email'):
+		raise HTTPException(status_code=400, detail="Your Google account email is not verified")
+	email = idinfo['email'].strip().lower()
+	try:
 		user = db.query(User).filter(User.email == email).first()
 		if not user:
 			user = User(email = email, username = generate_username(db, email))
@@ -653,8 +712,9 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 			db.refresh(user)
 		token = jwt_helper.create_jwt_token(user.id, user.email)
 		return {"status": "success", "token": token}
-	except Exception as e:
-		raise HTTPException(status_code=400, detail="Invalid Google token")
+	except Exception:
+		db.rollback()
+		raise server_error("Could not sign in with Google. Please try again later.")
 
 
 

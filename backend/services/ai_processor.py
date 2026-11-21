@@ -100,7 +100,8 @@ def analyze_video_with_ai(transcript: str, caption: str, video_path=None, instru
 
 		return json.loads(text)
 	except json.JSONDecodeError as e:
-		raise ValueError(f"Invalid JSON returned by model: {text}") from e
+		print("Invalid JSON returned by model:", repr(e.doc[:1000]))
+		raise ValueError("The AI returned an invalid recipe. Please try again.") from e
 	except Exception as e:
 		print("FULL ERROR:", repr(e))
 		raise
@@ -164,7 +165,8 @@ def build_ai_recipe(instructions : str, ingredients : list[str]) -> dict:
 
 		return json.loads(text)
 	except json.JSONDecodeError as e:
-		raise ValueError(f"Invalid JSON returned by model: {text}") from e
+		print("Invalid JSON returned by model:", repr(e.doc[:1000]))
+		raise ValueError("The AI returned an invalid recipe. Please try again.") from e
 	except Exception as e:
 		print("FULL ERROR:", repr(e))
 		raise
@@ -247,7 +249,8 @@ def analyze_slideshow_with_ai(caption: str, photo_paths=None, instructions="") -
 
 		return json.loads(text)
 	except json.JSONDecodeError as e:
-		raise ValueError(f"Invalid JSON returned by model: {text}") from e
+		print("Invalid JSON returned by model:", repr(e.doc[:1000]))
+		raise ValueError("The AI returned an invalid recipe. Please try again.") from e
 	except Exception as e:
 		print("FULL ERROR:", repr(e))
 		raise
