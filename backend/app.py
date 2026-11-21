@@ -613,19 +613,6 @@ def get_feed(db : Session = Depends(get_db)):
 			})
 	return {"recipes": recipe_list}
 
-@app.get("/api/home/feed")
-def get_user_feed(db : Session = Depends(get_db), _ : User = Depends(get_current_user)):
-	result = db.query(Recipe, User).join(User, User.id == Recipe.user_id).filter(Recipe.is_public == True).order_by(Recipe.created_at.desc()).limit(3).all()
-	recipe_list = []
-	for r, owner in result:
-			recipe_list.append({
-				"id": r.id,
-				"title": r.title,
-				"prep_time": r.prep_time,
-				"owner_username": owner.username
-			})
-	return {"recipes": recipe_list}
-
 @app.get("/api/public/recipes")
 def get_all_public_recipes(db : Session = Depends(get_db)):
 	recipes = db.query(Recipe).filter(Recipe.is_public == True).all()

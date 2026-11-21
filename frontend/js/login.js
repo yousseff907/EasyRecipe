@@ -85,7 +85,7 @@ function showMessage(text, isError) {
 }
 
 function loadFeed() {
-	fetch('/api/feed?limit=3')
+	fetch('/api/feed')
 		.then(r => r.json())
 		.then(data => {
 			if (!data.recipes) return;

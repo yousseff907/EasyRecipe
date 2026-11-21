@@ -99,10 +99,7 @@ function loadMyFavorites() {
 }
 
 function loadFeed() {
-	const token = localStorage.getItem('auth_token');
-	fetch('/api/home/feed', {
-		headers: { 'Authorization': `Bearer ${token}` }
-	})
+	fetch('/api/feed')
 		.then(r => r.json())
 		.then(data => {
 			document.getElementById('feedLoading').classList.add('hidden');
