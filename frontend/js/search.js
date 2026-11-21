@@ -41,7 +41,6 @@ function setType(type) {
 		btnRecipes.className = 'px-8 py-2 font-semibold transition bg-white text-pink-dark';
 	}
 
-	// Clear results when switching type
 	document.getElementById('results').classList.add('hidden');
 	document.getElementById('emptyState').classList.add('hidden');
 	document.getElementById('resultsGrid').innerHTML = '';

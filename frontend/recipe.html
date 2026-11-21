@@ -38,7 +38,6 @@
 			</div>
 		</div>
 
-		<!-- Dropdown Menu -->
 		<div id="mobileMenu"
 			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
 			<nav class="py-2">
@@ -62,10 +61,8 @@
 
 
 
-	<!-- Main Content -->
 	<main class="max-w-4xl mx-auto px-4 py-8">
 		<div class="bg-white rounded-2xl shadow-xl p-8">
-			<!-- Back Button -->
 			<a id="backBtn" href="/recipes"
 				class="inline-flex items-center text-pink-dark hover:text-pink-medium mb-6 transition">
 				<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,19 +71,15 @@
 				Back to Recipes
 			</a>
 
-			<!-- Loading State -->
 			<div id="loading" class="text-center py-8">
 				<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-dark"></div>
 				<p class="mt-4 text-gray-600">Loading recipe...</p>
 			</div>
 
-			<!-- Recipe Content -->
 			<div id="recipeContent" class="hidden">
-				<!-- Title -->
 				<h2 id="recipeTitle" class="text-2xl md:text-4xl font-bold text-gray-800 mb-6 break-words"></h2>
 				<p id="recipeOwner" class="text-pink-dark text-sm mb-4 break-words"></p>
 
-				<!-- Recipe Info -->
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 					<div class="text-center p-4 bg-pink-light rounded-lg">
 						<p class="text-sm text-gray-600 mb-1">Prep Time</p>
@@ -106,9 +99,7 @@
 					</div>
 				</div>
 
-				<!-- Action Buttons -->
 				<div class="flex flex-wrap gap-3 mb-8 justify-center">
-					<!-- Download Video — owner only -->
 					<button id="downloadBtn" onclick="downloadVideo()"
 						class="hidden w-full sm:w-auto bg-pink-dark hover:bg-pink-medium text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -119,12 +110,10 @@
 						Download Video
 					</button>
 
-					<!-- Public/Private Toggle — owner only -->
 					<button id="privacyBtn" onclick="togglePrivacy()"
 						class="hidden w-full sm:w-auto font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg border-2">
 					</button>
 
-					<!-- Delete — owner only -->
 					<button id="deleteBtn" onclick="deleteRecipe()"
 						class="hidden w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -135,7 +124,6 @@
 						Delete
 					</button>
 
-					<!-- Share — everyone, only if recipe is public -->
 					<button id="shareBtn" onclick="shareRecipe()"
 						class="hidden w-full sm:w-auto border-2 border-pink-dark text-pink-dark hover:bg-pink-light font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -146,7 +134,6 @@
 						Share
 					</button>
 
-					<!-- Download PDF — everyone, only if recipe is public -->
 					<button id="pdfBtn" onclick="downloadPDF()"
 						class="hidden w-full sm:w-auto border-2 border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -167,26 +154,22 @@
 						Edit
 					</button>
 
-					<!-- Favorite — everyone -->
 					<button id="favoriteBtn" onclick="toggleFavorite()"
 						class="w-full sm:w-auto font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 border-2 border-pink-dark text-pink-dark hover:bg-pink-light">
 					</button>
 
 				</div>
 
-				<!-- Ingredients -->
 				<div class="mb-8">
 					<h3 class="text-2xl font-bold text-gray-800 mb-4 break-words">Ingredients</h3>
 					<ul id="ingredientsList" class="space-y-2 bg-pink-light p-6 rounded-lg"></ul>
 				</div>
 
-				<!-- Instructions -->
 				<div>
 					<h3 class="text-2xl font-bold text-gray-800 mb-4 break-words">Instructions</h3>
 					<ol id="stepsList" class="space-y-4"></ol>
 				</div>
 
-				<!-- Nutrition -->
 				<div class="mt-6">
 					<button onclick="toggleNutrition()" id="nutritionBtn"
 						class="w-full bg-white border-2 border-pink-dark text-pink-dark px-4 py-3 rounded-lg hover:bg-pink-light transition font-semibold">
@@ -221,12 +204,10 @@
 				</div>
 			</div>
 
-			<!-- Message Display -->
 			<div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
 		</div>
 	</main>
 
-	<!-- Footer -->
 	<footer class="bg-white border-t mt-auto">
 		<div class="w-full px-4 py-6 text-center text-gray-600 text-sm">
 			<p>&copy; 2026 EasyRecipe. All rights reserved.</p>

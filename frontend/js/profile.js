@@ -1,7 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 
-	// Get username from URL path e.g. /user/youssef
 	const pathParts = window.location.pathname.split('/');
 	let username = '';
 	try {
@@ -44,7 +43,6 @@ function loadProfile(username) {
 			document.getElementById('loading').classList.add('hidden');
 			document.getElementById('profileContent').classList.remove('hidden');
 
-			// Avatar — first letter of username
 			document.getElementById('profileAvatar').textContent = data.username.charAt(0).toUpperCase();
 			document.getElementById('profileUsername').textContent = '@' + data.username;
 			document.getElementById('profileBio').textContent = data.bio || 'No bio yet.';

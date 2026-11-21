@@ -51,7 +51,6 @@ function loadRecipes() {
 			document.getElementById('loading').classList.add('hidden');
 			if (data && data.recipes) {
 				displayRecipes(data.recipes);
-				// Pre-cache individual recipes for offline
 				if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
 					const token = localStorage.getItem('auth_token');
 					navigator.serviceWorker.controller.postMessage({

@@ -1,10 +1,8 @@
-// Check authentication and load recipes
 window.addEventListener('DOMContentLoaded', () => {
-	checkAuth(); // From utils.js
+	checkAuth();
 	loadRecipes();
 });
 
-// Function: Load all recipes
 function loadRecipes() {
 	const token = localStorage.getItem('auth_token');
 
@@ -38,7 +36,6 @@ function loadRecipes() {
 		});
 }
 
-// Function: Display recipes in grid
 function displayRecipes(recipes) {
 	const recipesList = document.getElementById('recipesList');
 	const recipesGrid = document.getElementById('recipesGrid');
@@ -61,9 +58,6 @@ function displayRecipes(recipes) {
 	});
 }
 
-// Function: Navigate to recipe detail
 function viewRecipe(recipeId) {
 	window.location.href = `/recipe?id=${recipeId}`;
 }
-
-// logout() and showMessage() are now in utils.js - removed from here!

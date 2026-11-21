@@ -1,9 +1,7 @@
-// Check authentication
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 });
 
-// Handle form submission
 document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 	e.preventDefault();
 
@@ -15,7 +13,6 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 	const servings = document.getElementById('servings').value;
 	const servingSize = document.getElementById('serving_size').value;
 
-	// Parse ingredients and steps
 	const ingredients = ingredientsText
 		.split('\n')
 		.map(line => line.trim())
@@ -26,7 +23,6 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		.map(line => line.trim())
 		.filter(line => line.length > 0);
 
-	// Validate
 	if (!title) {
 		showMessage('Please enter a recipe title', true);
 		return;
@@ -52,7 +48,6 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		return;
 	}
 
-	// Build nutrition object if provided
 	let nutrition = null;
 	const calories = document.getElementById('calories').value;
 	const protein = document.getElementById('protein').value;
@@ -68,7 +63,6 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		};
 	}
 
-	// Build request body
 	const requestBody = {
 		title: title,
 		ingredients: ingredients,
@@ -80,7 +74,6 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 		nutrition: nutrition
 	};
 
-	// Disable button
 	const submitBtn = document.getElementById('submitBtn');
 	submitBtn.disabled = true;
 	submitBtn.textContent = 'Saving...';

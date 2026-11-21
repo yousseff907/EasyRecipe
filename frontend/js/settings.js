@@ -1,4 +1,3 @@
-// Fetch and display current username
 async function loadCurrentUsername() {
 	const token = localStorage.getItem('auth_token');
 	if (!token) return;
@@ -22,7 +21,6 @@ async function loadCurrentUsername() {
 	}
 }
 
-// Function: Change Bio
 async function changeBio() {
 	const newBio = document.getElementById('newBio').value.trim();
 
@@ -57,7 +55,6 @@ async function changeBio() {
 	}
 }
 
-// Function: Change Username
 async function changeUsername() {
 	const newUsername = document.getElementById('newUsername').value.trim();
 
@@ -72,8 +69,8 @@ async function changeUsername() {
 	}
 
 	try {
-		const token = localStorage.getItem('auth_token');  // FIXED: was 'auth_token'
-		const response = await fetch('/api/change_username', {  // FIXED: removed API_URL
+		const token = localStorage.getItem('auth_token');
+		const response = await fetch('/api/change_username', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -93,7 +90,6 @@ async function changeUsername() {
 		if (response.ok) {
 			showMessage('Username updated successfully!', false);
 			document.getElementById('newUsername').value = '';
-			// Reload username display
 			loadCurrentUsername();
 		} else {
 			showMessage(data.detail || 'Failed to update username', true);
@@ -103,7 +99,6 @@ async function changeUsername() {
 	}
 }
 
-// Function: Confirm Delete Account
 function confirmDelete() {
 	const reason = document.getElementById('deleteReason').value.trim();
 
@@ -117,7 +112,6 @@ function confirmDelete() {
 		return;
 	}
 
-	// Show confirmation dialog
 	const confirmed = confirm(
 		'ARE YOU ABSOLUTELY SURE?\n\n' +
 		'This will permanently delete:\n' +
@@ -133,11 +127,10 @@ function confirmDelete() {
 	}
 }
 
-// Function: Delete Account
 async function deleteAccount(feedback) {
 	try {
-		const token = localStorage.getItem('auth_token');  // FIXED: was 'auth_token'
-		const response = await fetch('/api/delete_account', {  // FIXED: removed API_URL
+		const token = localStorage.getItem('auth_token');
+		const response = await fetch('/api/delete_account', {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -159,7 +152,6 @@ async function deleteAccount(feedback) {
 	}
 }
 
-// Show message helper
 function showMessage(text, isError) {
 	const messageDiv = document.getElementById('message');
 	messageDiv.textContent = text;
@@ -171,7 +163,6 @@ function showMessage(text, isError) {
 	}, 5000);
 }
 
-// Initialize on page load - SINGLE listener
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 	loadCurrentUsername();

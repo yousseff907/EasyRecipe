@@ -11,7 +11,6 @@ window.addEventListener('DOMContentLoaded', () => {
 		return;
 	}
 
-	// Set back button to go back to the recipe
 	document.getElementById('backBtn').href = `/recipe?id=${recipeId}`;
 
 	loadRecipe(recipeId);
@@ -39,7 +38,6 @@ function loadRecipe(id) {
 		.then(data => {
 			if (!data) return;
 
-			// Check ownership
 			if (data.owner_id !== data.current_user_id) {
 				window.location.href = '/recipes';
 				return;
@@ -48,7 +46,6 @@ function loadRecipe(id) {
 			document.getElementById('loading').classList.add('hidden');
 			document.getElementById('formContent').classList.remove('hidden');
 
-			// Pre-fill form
 			document.getElementById('title').value = data.title || '';
 			document.getElementById('prepTime').value = data.prep_time || '';
 			document.getElementById('cookTime').value = data.cook_time || '';

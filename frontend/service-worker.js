@@ -39,7 +39,6 @@ const STATIC_ASSETS = [
 	'/output.css'
 ];
 
-// Install — cache static assets
 self.addEventListener('install', event => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then(cache => {
@@ -49,7 +48,6 @@ self.addEventListener('install', event => {
 	self.skipWaiting();
 });
 
-// Activate — delete old caches
 self.addEventListener('activate', event => {
 	event.waitUntil(
 		caches.keys().then(keys => {
@@ -61,16 +59,13 @@ self.addEventListener('activate', event => {
 	self.clients.claim();
 });
 
-// Fetch — strategy based on request type
 self.addEventListener('fetch', event => {
 	const url = new URL(event.request.url);
 
-	// Skip non-GET and cross-origin requests
 	if (event.request.method !== 'GET' || url.origin !== location.origin) {
 		return;
 	}
 
-	// API requests — network first, cache fallback
 	if (url.pathname.startsWith('/api/')) {
 		event.respondWith(
 			fetch(event.request)
@@ -84,7 +79,6 @@ self.addEventListener('fetch', event => {
 		return;
 	}
 
-	// Static assets — cache first, network fallback
 	event.respondWith(
 		caches.match(event.request).then(cached => {
 			return cached || fetch(event.request).then(response => {
@@ -96,7 +90,6 @@ self.addEventListener('fetch', event => {
 	);
 });
 
-// Message from page — pre-cache individual recipes
 self.addEventListener('message', event => {
 	if (event.data.type === 'CACHE_RECIPES') {
 		const { recipes, token } = event.data;

@@ -1,6 +1,5 @@
-// Check if user is logged in on page load
 window.addEventListener('DOMContentLoaded', () => {
-	checkAuth(); // Now from utils.js
+	checkAuth();
 });
 
 function startProgressMessages() {
@@ -21,27 +20,22 @@ function startProgressMessages() {
 	});
 }
 
-// Function: Extract recipe from video URL
 function extractRecipe() {
 	const url = document.getElementById('videoUrl').value;
 	const instructions = document.getElementById('instructions').value;
 
-	// Validate URL
 	if (!url) {
 		showMessage('Please enter a video URL', true);
 		return;
 	}
 
-	// Get token
 	const token = localStorage.getItem('auth_token');
 
-	// Show loading state
 	document.getElementById('extractBtn').disabled = true;
 	document.getElementById('loading').classList.remove('hidden');
 	startProgressMessages();
 	document.getElementById('recipeDisplay').classList.add('hidden');
 
-	// Call backend
 	fetch(`${API_URL}/api/extract`, {
 		method: 'POST',
 		headers: {

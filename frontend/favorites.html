@@ -19,14 +19,11 @@
     <meta property="og:image:type" content="image/png">
 </head>
 
-<!-- AFTER (correct) -->
 
 <body class="bg-gradient-to-br from-pink-light to-white min-h-screen flex flex-col">
-	<!-- Header with Hamburger Menu -->
 
 	<header class="bg-white shadow-sm">
 		<div class="w-full px-4 py-4">
-			<!-- Desktop Header -->
 			<div class="flex justify-between items-center">
 				<a href="/home" class="text-2xl font-bold text-pink-dark">EasyRecipe</a>
 
@@ -34,7 +31,6 @@
 
 
 
-					<!-- Hamburger Menu Button -->
 					<button id="menuBtn" onclick="toggleMenu()"
 						class="text-pink-dark hover:text-pink-medium transition focus:outline-none">
 						<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +42,6 @@
 			</div>
 		</div>
 
-		<!-- Dropdown Menu -->
 		<div id="mobileMenu"
 			class="hidden absolute right-4 top-16 bg-white rounded-lg shadow-xl border-2 border-pink-light z-50 w-64">
 			<nav class="py-2">
@@ -67,18 +62,15 @@
 		</div>
 	</header>
 
-	<!-- Main Content -->
 	<main class="max-w-7xl mx-auto px-4 py-8">
 		<div class="bg-white rounded-2xl shadow-xl p-8">
 			<h2 class="text-3xl font-bold text-gray-800 mb-6">My Favorite Recipes</h2>
 
-			<!-- Loading State -->
 			<div id="loading" class="text-center py-8">
 				<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-dark"></div>
 				<p class="mt-4 text-gray-600">Loading recipes...</p>
 			</div>
 
-			<!-- Empty State -->
 			<div id="emptyState" class="hidden text-center py-12">
 				<p class="text-gray-500 text-lg mb-4">You haven't favorited any recipes yet.</p>
 				<a href="/search"
@@ -87,17 +79,14 @@
 				</a>
 			</div>
 
-			<!-- Recipes List Container -->
 			<div id="recipesList" class="hidden">
 				<div id="recipesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 			</div>
 
-			<!-- Message Display -->
 			<div id="message" class="mt-4 p-4 rounded-lg hidden"></div>
 		</div>
 	</main>
 
-	<!-- Footer -->
 	<footer class="bg-white border-t mt-auto">
 		<div class="w-full px-4 py-6 text-center text-gray-600 text-sm">
 			<p>&copy; 2026 EasyRecipe. All rights reserved.</p>

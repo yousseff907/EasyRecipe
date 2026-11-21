@@ -1,4 +1,3 @@
-// Get recipe ID from URL and load recipe
 window.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 
@@ -18,7 +17,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 });
 
-// Function: Load single recipe (own or public)
 function loadRecipe(recipeId) {
 	const token = localStorage.getItem('auth_token');
 
@@ -50,7 +48,6 @@ function loadRecipe(recipeId) {
 		});
 }
 
-// Function: Load recipe from someone's profile
 function loadRecipeFromProfile(recipeId, username) {
 	const token = localStorage.getItem('auth_token');
 
@@ -82,28 +79,23 @@ function loadRecipeFromProfile(recipeId, username) {
 		});
 }
 
-// Function: Display recipe details
 function displayRecipe(recipe) {
 	document.getElementById('loading').classList.add('hidden');
 	document.getElementById('recipeContent').classList.remove('hidden');
 
-	// Store recipe state globally for use by button functions
 	window.currentRecipeId = recipe.id;
 	window.currentIsPublic = recipe.is_public;
 	window.currentIsFavorited = recipe.is_favorited;
 
-	// Title
 	document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
 	const owner = recipe.owner_username;
 	document.getElementById('recipeOwner').innerHTML = `by <a href="/user/${encodeURIComponent(owner)}" class="hover:underline">@${escapeHtml(owner)}</a>`;
 
-	// Times and servings
 	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';
 	document.getElementById('cookTime').textContent = recipe.cook_time ? `${recipe.cook_time} min` : '-';
 	document.getElementById('servings').textContent = recipe.servings || '-';
 	document.getElementById('servingSize').textContent = recipe.serving_size || '-';
 
-	// Ingredients
 	const ingredientsList = document.getElementById('ingredientsList');
 	ingredientsList.innerHTML = '';
 	if (recipe.ingredients && recipe.ingredients.length > 0) {
@@ -118,7 +110,6 @@ function displayRecipe(recipe) {
 		});
 	}
 
-	// Steps
 	const stepsList = document.getElementById('stepsList');
 	stepsList.innerHTML = '';
 	if (recipe.steps && recipe.steps.length > 0) {
@@ -135,7 +126,6 @@ function displayRecipe(recipe) {
 		});
 	}
 
-	// Nutrition
 	const nutritionBtn = document.getElementById('nutritionBtn');
 	if (recipe.nutrition_per_serving) {
 		nutritionBtn.classList.remove('hidden');
@@ -144,7 +134,6 @@ function displayRecipe(recipe) {
 		nutritionBtn.classList.add('hidden');
 	}
 
-	// Show owner-only buttons
 	const isOwner = recipe.owner_id === recipe.current_user_id;
 	if (isOwner) {
 		document.getElementById('deleteBtn').classList.remove('hidden');
@@ -155,10 +144,8 @@ function displayRecipe(recipe) {
 		document.getElementById('downloadBtn').classList.remove('hidden');
 	}
 
-	// Set initial state of privacy button
 	updatePrivacyBtn(recipe.is_public);
 
-	// Set initial state of favorite button
 	updateFavoriteBtn(recipe.is_favorited);
 
 	if (recipe.is_public) {
@@ -166,7 +153,6 @@ function displayRecipe(recipe) {
 		document.getElementById('pdfBtn').classList.remove('hidden');
 	}
 
-	// Back button
 	const urlParams = new URLSearchParams(window.location.search);
 	const backBtn = document.getElementById('backBtn');
 	const username = urlParams.get('username');
@@ -225,7 +211,6 @@ function downloadPDF() {
         .catch(() => showMessage('Failed to generate PDF', true));
 }
 
-// Helper: Update privacy button text and style (never touches hidden class)
 function updatePrivacyBtn(isPublic) {
 	const btn = document.getElementById('privacyBtn');
 	if (isPublic) {
@@ -239,7 +224,6 @@ function updatePrivacyBtn(isPublic) {
 	}
 }
 
-// Helper: Update favorite button text and style
 function updateFavoriteBtn(isFavorited) {
 	const btn = document.getElementById('favoriteBtn');
 	if (isFavorited) {
@@ -251,7 +235,6 @@ function updateFavoriteBtn(isFavorited) {
 	}
 }
 
-// Function: Toggle public/private
 function togglePrivacy() {
 	const token = localStorage.getItem('auth_token');
 	const recipeId = window.currentRecipeId;
@@ -274,7 +257,6 @@ function togglePrivacy() {
 		.catch(() => showMessage('Failed to update privacy', true));
 }
 
-// Function: Toggle favorite
 function toggleFavorite() {
 	const token = localStorage.getItem('auth_token');
 	const recipeId = window.currentRecipeId;
@@ -299,7 +281,6 @@ function toggleFavorite() {
 		.catch(() => showMessage('Failed to update favorite', true));
 }
 
-// Function: Download video
 function downloadVideo() {
 	const token = localStorage.getItem('auth_token');
 	const recipeId = window.currentRecipeId;
@@ -330,7 +311,6 @@ function downloadVideo() {
 		.catch(() => showMessage('Failed to download video', true));
 }
 
-// Function: Delete recipe
 function deleteRecipe() {
 	const recipeId = window.currentRecipeId;
 	if (!recipeId) return;

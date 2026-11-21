@@ -1,4 +1,3 @@
-// Shared utility functions used across all pages
 
 const API_URL = '';
 
@@ -11,7 +10,6 @@ function escapeHtml(value) {
 		.replace(/'/g, '&#39;');
 }
 
-// Check authentication and redirect if not logged in
 function checkAuth() {
 	let token = localStorage.getItem('auth_token');
 	if (!token) {
@@ -26,13 +24,11 @@ function checkAuth() {
 	return true;
 }
 
-// Toggle mobile menu
 function toggleMenu() {
 	const menu = document.getElementById('mobileMenu');
 	menu.classList.toggle('hidden');
 }
 
-// Close menu when clicking outside
 document.addEventListener('click', (e) => {
 	const menu = document.getElementById('mobileMenu');
 	const menuBtn = document.getElementById('menuBtn');
@@ -41,14 +37,12 @@ document.addEventListener('click', (e) => {
 	}
 });
 
-// Logout function
 function logout() {
 	localStorage.removeItem('auth_token');
 	document.cookie = 'auth_token=; path=/; max-age=0';
 	window.location.href = '/login';
 }
 
-// Show message to user
 function showMessage(text, isError) {
 	const msgDiv = document.getElementById('message');
 	msgDiv.textContent = text;
@@ -64,7 +58,6 @@ function showMessage(text, isError) {
 	}
 }
 
-// Toggle nutrition panel
 function toggleNutrition() {
 	const panel = document.getElementById('nutritionPanel');
 	const btn = document.getElementById('nutritionBtn');
@@ -78,7 +71,6 @@ function toggleNutrition() {
 	}
 }
 
-// Display nutrition data
 function displayNutrition(nutrition) {
 	if (nutrition) {
 		document.getElementById('nutritionCalories').textContent = nutrition.calories || '-';
@@ -88,7 +80,6 @@ function displayNutrition(nutrition) {
 	}
 }
 
-// Update character count for textareas
 function updateCharCount(textareaId, counterId, maxLength) {
 	const textarea = document.getElementById(textareaId);
 	const counter = document.getElementById(counterId);

@@ -5,14 +5,12 @@ window.addEventListener('DOMContentLoaded', () => {
 	loadMyFavorites();
 	loadFeed();
 
-	// iOS guide
 	const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 	const isStandalone = window.navigator.standalone;
 	if (isIOS && !isStandalone) {
 		document.getElementById('iosGuide').classList.remove('hidden');
 	}
 
-	// Android install
 	let deferredPrompt = null;
 	window.addEventListener('beforeinstallprompt', (e) => {
 		e.preventDefault();
