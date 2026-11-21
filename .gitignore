@@ -22,6 +22,7 @@ __pycache__/
 # Temporary data files
 data/audio_*
 data/video_*
+data/image_*
 *.m4a
 *.mp4
 *.wav
