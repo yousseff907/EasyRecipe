@@ -47,6 +47,8 @@ The backend restarts when you edit Python files. The frontend is served straight
 
 The backend refuses to start if a required variable is missing and prints which ones. The Makefile's production targets call `docker-compose`; if you only have Compose v2, run `docker compose up -d --build` instead.
 
+nginx rate limits the API per IP address: 5 requests a minute for extraction, AI recipes, PDFs and video downloads, 5 a minute for login, and 20 a second for everything else. Over the limit, the API answers with a 429 and the page shows "Too many requests". If you put the site behind Cloudflare or another proxy, nginx sees the proxy's address instead of the visitor's, so all visitors share one limit. In that case, set up nginx's `real_ip` module (`set_real_ip_from` with the proxy's IP ranges and `real_ip_header`) so it uses the real client address. The limits are defined at the top of `nginx/nginx.conf`.
+
 The privacy policy, terms and contact pages in `frontend/` were written for the original hosted site. Read them before running your own instance. Downloading videos may also be restricted by TikTok's and Facebook's terms of service.
 
 ## Configuration
