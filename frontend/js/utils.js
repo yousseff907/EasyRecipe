@@ -97,7 +97,7 @@ function updateCharCount(textareaId, counterId, maxLength) {
 }
 
 function shareRecipe(recipeId) {
-	const url = `https://www.easyrecipe.online/r/${recipeId}`;
+	const url = `${window.location.origin}/r/${recipeId}`;
 	navigator.clipboard.writeText(url).then(() => {
 		const toast = document.createElement('div');
 		toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 font-semibold';

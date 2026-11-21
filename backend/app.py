@@ -21,7 +21,7 @@ from utils.auth import get_current_user
 from services.moderation_service import moderate_content
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID, CORS_ORIGINS
+from config import TURNSTILE_SECRET_KEY, GOOGLE_CLIENT_ID, CORS_ORIGINS, SITE_DOMAIN, SITE_URL
 from models.account_feedback import AccountFeedback
 from fastapi.templating import Jinja2Templates
 from google.oauth2 import id_token
@@ -610,7 +610,8 @@ def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 			"serving_size": recipe.serving_size,
 			"ingredients": json.loads(recipe.ingredients),
 			"steps": json.loads(recipe.steps),
-			"nutrition": nutrition
+			"nutrition": nutrition,
+			"site_url": SITE_URL
 		})
 	except HTTPException:
 		raise
@@ -728,6 +729,7 @@ def download_pdf(recipe_id : int, db : Session = Depends(get_db)):
 		ingredients=json.loads(recipe.ingredients),
 		steps=json.loads(recipe.steps),
 		nutrition=json.loads(recipe.nutrition) if recipe.nutrition else None,
+		site_domain=SITE_DOMAIN,
 	)
 
 	pdf = HTML(string=html_content, url_fetcher=block_all_urls).write_pdf()

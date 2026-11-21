@@ -15,6 +15,9 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    environment:
+      - SITE_DOMAIN=${SITE_DOMAIN:?Set SITE_DOMAIN in .env}
+      - CONTACT_EMAIL=${CONTACT_EMAIL:?Set CONTACT_EMAIL in .env}
     volumes:
       - ./frontend:/usr/share/nginx/html
       - /etc/letsencrypt:/etc/letsencrypt:ro 

@@ -12,3 +12,6 @@ TURNSTILE_SECRET_KEY = os.getenv('TURNSTILE_SECRET_KEY')
 GOOGLE_CLIENT_ID=os.getenv('GOOGLE_CLIENT_ID')
 CORS_ORIGINS = [o.strip() for o in os.getenv('CORS_ORIGINS', '').split(',') if o.strip()]
 SQL_ECHO = os.getenv('SQL_ECHO', '') == '1'
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'localhost')
+SITE_URL = f"https://{SITE_DOMAIN}"
+EMAIL_FROM = os.getenv('EMAIL_FROM') or f"EasyRecipe <noreply@{SITE_DOMAIN}>"

@@ -1,0 +1,89 @@
+server {
+	listen 80;
+	server_name ${SITE_DOMAIN} www.${SITE_DOMAIN};
+	return 301 https://$server_name$request_uri;
+}
+
+server {
+	listen 443 ssl;
+	server_name ${SITE_DOMAIN} www.${SITE_DOMAIN};
+
+	ssl_certificate /etc/letsencrypt/live/${SITE_DOMAIN}/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/${SITE_DOMAIN}/privkey.pem;
+
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_prefer_server_ciphers on;
+
+	sub_filter_once off;
+	sub_filter_types text/plain text/xml application/xml;
+	sub_filter '__SITE_DOMAIN__' '${SITE_DOMAIN}';
+	sub_filter '__CONTACT_EMAIL__' '${CONTACT_EMAIL}';
+
+	location ~ \.php$ {
+		return 302 https://www.youtube.com/watch?v=dQw4w9WgXcQ;
+	}
+
+	location ~ /\.env {
+		return 302 https://www.youtube.com/watch?v=dQw4w9WgXcQ;
+	}
+
+	location ~ /(wp-admin|wp-content|wp-includes|vendor|phpunit) {
+		return 302 https://www.youtube.com/watch?v=dQw4w9WgXcQ;
+	}
+
+	location ~ docker-compose {
+		return 302 https://www.youtube.com/watch?v=dQw4w9WgXcQ;
+	}
+
+	location /cgi-bin/ {
+		return 444;
+	}
+
+	error_page 404 /404.html;
+	error_page 500 502 503 504 /404.html;
+
+	location = /404.html {
+		root /usr/share/nginx/html;
+		internal;
+	}
+
+	location = /r/ {
+		root /usr/share/nginx/html;
+		try_files /r.html =404;
+	}
+
+	location /r/ {
+		proxy_pass http://backend:8000;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_intercept_errors on;
+	}
+
+	location /user/ {
+		root /usr/share/nginx/html;
+		try_files /profile.html =404;
+	}
+
+	location / {
+		root /usr/share/nginx/html;
+		index login.html;
+		try_files $uri $uri.html $uri/ =404;
+	}
+
+	location /api/ {
+		proxy_pass http://backend:8000;
+		proxy_read_timeout 300s;
+		proxy_send_timeout 300s;
+		proxy_connect_timeout 300s;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+	}
+	location = /service-worker.js {
+		root /usr/share/nginx/html;
+		add_header Cache-Control "no-cache";
+	}
+}

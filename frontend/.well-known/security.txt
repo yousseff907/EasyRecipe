@@ -1,2 +1,2 @@
-Contact: mailto:easyrecipe.online@outlook.com
+Contact: mailto:__CONTACT_EMAIL__
 Expires: 2027-04-18T00:00:00z

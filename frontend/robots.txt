@@ -31,4 +31,4 @@ Allow: /
 User-agent: *
 Disallow: /
 
-Sitemap: https://www.easyrecipe.online/sitemap.xml
+Sitemap: https://__SITE_DOMAIN__/sitemap.xml

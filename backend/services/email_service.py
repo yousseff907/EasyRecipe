@@ -1,5 +1,5 @@
 import resend
-from config import RESEND_API_KEY
+from config import RESEND_API_KEY, EMAIL_FROM
 
 resend.api_key = RESEND_API_KEY
 
@@ -105,7 +105,7 @@ def send_email(email: str, code: str):
 		</html>
 		"""
 		params = {
-        "from": "EasyRecipe <noreply@easyrecipe.online>",
+        "from": EMAIL_FROM,
         "to": [email],
         "subject": "Your EasyRecipe Verification Code",
         "html": html_content}
