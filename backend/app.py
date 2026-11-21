@@ -29,7 +29,6 @@ from google.auth.transport import requests as google_requests
 from google.auth.exceptions import GoogleAuthError
 from weasyprint import HTML
 
-# Usernames end up in URLs and HTML, so only allow a safe set of characters.
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9_.]{3,30}$")
 
 def generate_username(db, email: str) -> str:
@@ -51,9 +50,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("easyrecipe")
 
 def server_error(message: str) -> HTTPException:
-	# Log the real exception (with traceback) on the server and send the client
-	# a generic message, so internal details never leak in API responses.
-	# Call this from inside an `except` block.
 	logger.exception(message)
 	return HTTPException(status_code=500, detail=message)
 
@@ -71,15 +67,11 @@ app = FastAPI()
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError):
-	# The frontend shows `detail` as text, so return one readable sentence
-	# instead of FastAPI's default list of error objects.
 	error = exc.errors()[0]
 	field = " ".join(str(part) for part in error["loc"][1:]) or "request"
 	message = error["msg"].removeprefix("Value error, ")
 	return JSONResponse(status_code=422, content={"detail": f"Invalid {field}: {message}"})
 
-# The bundled frontend is served from the same origin as the API, so CORS is off
-# by default. Set CORS_ORIGINS (comma-separated) only if you host the frontend elsewhere.
 if CORS_ORIGINS:
 	app.add_middleware(
 		CORSMiddleware,
@@ -172,7 +164,6 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 		if '/photo/' in url or not url:
 			raise HTTPException(status_code=400, detail="Video download not available for photo slideshows")
 	try:
-		# Re-check stored URLs: older rows were saved under a weaker check.
 		validate_video_url(url)
 		url = resolve_short_link(url)
 		video_path = download_video(url)
@@ -438,7 +429,6 @@ def delete_account(request : Feedback, current_user : User = Depends(get_current
 			raise HTTPException(status_code=400, detail=(f"Feedback content violates our community guidelines. "
 								f"Please review and remove inappropriate content"))
 
-		# Stored anonymously (no user id or email) since the account is being deleted.
 		if request.feedback.strip():
 			db.add(AccountFeedback(feedback=request.feedback.strip()))
 		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
@@ -628,7 +618,6 @@ def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
 		raise
 
 class RecipeEdit(BaseModel):
-	# Same limits as SelfMadeRecipe
 	title: RecipeTitle
 	ingredients: list[RecipeLine] = Field(max_length=100)
 	steps: list[RecipeLine] = Field(max_length=50)
@@ -699,7 +688,6 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 		raise HTTPException(status_code=400, detail="Invalid Google token")
 	except Exception:
 		raise server_error("Could not sign in with Google. Please try again later.")
-	# Only trust emails Google has verified, otherwise anyone could claim an address.
 	if not idinfo.get('email_verified') or not idinfo.get('email'):
 		raise HTTPException(status_code=400, detail="Your Google account email is not verified")
 	email = idinfo['email'].strip().lower()
@@ -721,8 +709,6 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 
 
 def block_all_urls(url):
-	# User text ends up in the PDF; never let WeasyPrint load files or URLs
-	# (file:// could leak server files such as /proc/self/environ).
 	raise ValueError(f"External resources are disabled in PDFs: {url}")
 
 @app.get("/api/recipes/{recipe_id}/pdf")

@@ -3,8 +3,6 @@ from datetime import datetime
 from utils.database import Base
 
 class AccountFeedback(Base):
-	# Optional feedback left when a user deletes their account.
-	# Deliberately not linked to the user: the account and its data are gone.
 	__tablename__ = "account_feedback"
 
 	id = Column(Integer, primary_key=True)

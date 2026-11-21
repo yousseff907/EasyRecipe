@@ -9,9 +9,6 @@ from utils.validators import validate_video_url
 SHORT_LINK_HOSTS = ('fb.watch',)
 
 def resolve_short_link(url, max_hops=3):
-	# yt-dlp has no extractor for fb.watch short links, and we disable its generic
-	# extractor (it would follow redirects anywhere). So follow the redirect ourselves,
-	# one hop at a time, and re-validate every target against the allowlist.
 	for _ in range(max_hops):
 		host = urlparse(url).hostname or ''
 		if not any(host == h or host.endswith('.' + h) for h in SHORT_LINK_HOSTS):
@@ -32,7 +29,7 @@ def download_audio(url):
 		subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
+				"--ies", "default,-generic",
 				"-x",
 				"--audio-format", "m4a",
 				"--no-playlist",
@@ -59,7 +56,7 @@ def download_video(url):
 		subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
+				"--ies", "default,-generic",
 				"--no-playlist",
 				"--restrict-filenames",
 				"-f", "bv*+ba/b",
@@ -82,7 +79,7 @@ def get_caption(url):
 		result = subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
+				"--ies", "default,-generic",
 				"--skip-download",
 				"--print", "%(description)s\nBy: %(uploader)s",
 				url
@@ -100,7 +97,6 @@ def get_caption(url):
 	
 def get_slideshow_data(url):
 	try:
-		# Pass the URL as a query parameter so it gets encoded properly
 		response = requests.get("https://tikwm.com/api/", params={"url": url}, timeout=30)
 		data = response.json()
 		if data.get("code") != 0:

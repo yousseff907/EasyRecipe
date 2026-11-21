@@ -2,8 +2,6 @@
 
 const API_URL = '';
 
-// Escape text before putting it inside an HTML template string.
-// Anything that comes from the server (titles, usernames, ingredients...) must go through this.
 function escapeHtml(value) {
 	return String(value ?? '')
 		.replace(/&/g, '&amp;')
