@@ -41,8 +41,17 @@ DANGEROUS_CHARS = [
     '%x',
 ]
 
-TIKTOK_URL = ['tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com']
-FACEBOOK_URL = ['facebook.com', 'fb.watch', 'fb.com']
+# Domains we accept, matched against the URL's real hostname.
+# Subdomains (www., m., vm., vt., web.) are accepted too.
+ALLOWED_DOMAINS = {
+	'tiktok.com': 'tiktok',
+	'facebook.com': 'facebook',
+	'fb.watch': 'facebook',
+	'fb.com': 'facebook',
+}
+
+# Facebook's outbound-link redirectors: allowed domain, but they forward to any site.
+BLOCKED_HOSTS = {'l.facebook.com', 'lm.facebook.com'}
 
 def is_valid_url(url) -> bool:
 	if not (url.startswith('http://') or url.startswith('https://')):
@@ -63,14 +72,24 @@ def is_supported_platform(url):
 
 
 def get_platform_name(url):
-	for urlType in TIKTOK_URL:
-		if urlType in url:
-			return 'tiktok'
-	for urlType in FACEBOOK_URL:
-		if urlType in url:
-			return 'facebook'
-	else:
+	# Don't search for 'tiktok.com' anywhere in the string: 'https://evil.com/?tiktok.com'
+	# would pass. Parse the URL and check the hostname itself.
+	try:
+		parsed = urlparse(url)
+		host = (parsed.hostname or '').rstrip('.')
+		port = parsed.port
+	except ValueError:
 		return None
+	if parsed.scheme not in ('http', 'https'):
+		return None
+	if port is not None or parsed.username or parsed.password:
+		return None
+	if host in BLOCKED_HOSTS or parsed.path.startswith('/l.php'):
+		return None
+	for domain, platform in ALLOWED_DOMAINS.items():
+		if host == domain or host.endswith('.' + domain):
+			return platform
+	return None
 
 
 def validate_video_url(url):

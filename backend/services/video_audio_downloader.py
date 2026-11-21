@@ -3,6 +3,27 @@ from glob import glob
 import uuid
 import os
 import requests
+from urllib.parse import urlparse, urljoin
+from utils.validators import validate_video_url
+
+SHORT_LINK_HOSTS = ('fb.watch',)
+
+def resolve_short_link(url, max_hops=3):
+	# yt-dlp has no extractor for fb.watch short links, and we disable its generic
+	# extractor (it would follow redirects anywhere). So follow the redirect ourselves,
+	# one hop at a time, and re-validate every target against the allowlist.
+	for _ in range(max_hops):
+		host = urlparse(url).hostname or ''
+		if not any(host == h or host.endswith('.' + h) for h in SHORT_LINK_HOSTS):
+			return url
+		response = requests.get(url, allow_redirects=False, timeout=15, stream=True)
+		response.close()
+		location = response.headers.get('Location')
+		if not location:
+			raise ValueError("Could not resolve the short link. Please paste the full video link.")
+		url = urljoin(url, location)
+		validate_video_url(url)
+	raise ValueError("Too many redirects. Please paste the full video link.")
 
 def download_audio(url):
 	try:
@@ -11,6 +32,7 @@ def download_audio(url):
 		subprocess.run(
 			[
 				"yt-dlp",
+				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
 				"-x",
 				"--audio-format", "m4a",
 				"--no-playlist",
@@ -37,6 +59,7 @@ def download_video(url):
 		subprocess.run(
 			[
 				"yt-dlp",
+				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
 				"--no-playlist",
 				"--restrict-filenames",
 				"-f", "bv*+ba/b",
@@ -59,6 +82,7 @@ def get_caption(url):
 		result = subprocess.run(
 			[
 				"yt-dlp",
+				"--ies", "default,-generic",  # only site extractors, never fetch arbitrary pages
 				"--skip-download",
 				"--print", "%(description)s\nBy: %(uploader)s",
 				url
@@ -76,7 +100,8 @@ def get_caption(url):
 	
 def get_slideshow_data(url):
 	try:
-		response = requests.get(f"https://tikwm.com/api/?url={url}")
+		# Pass the URL as a query parameter so it gets encoded properly
+		response = requests.get("https://tikwm.com/api/", params={"url": url}, timeout=30)
 		data = response.json()
 		if data.get("code") != 0:
 			raise RuntimeError("Failed to fetch slideshow data")
@@ -94,7 +119,7 @@ def download_slideshow_images(image_urls):
 		try:
 			file_id = str(uuid.uuid4())
 			image_path = f"data/image_{file_id}_{index}.jpg"
-			response = requests.get(image_url)
+			response = requests.get(image_url, timeout=30)
 			with open(image_path, "wb") as f:
 				f.write(response.content)
 			image_paths.append(image_path)

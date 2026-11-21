@@ -66,6 +66,7 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		url = request.url
 		instructions = request.instructions
 		validate_video_url(url)
+		url = resolve_short_link(url)
 		try:
 			caption = get_caption(url)
 		except:
@@ -131,6 +132,9 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 		if '/photo/' in url or not url:
 			raise HTTPException(status_code=400, detail="Video download not available for photo slideshows")
 	try:
+		# Re-check stored URLs: older rows were saved under a weaker check.
+		validate_video_url(url)
+		url = resolve_short_link(url)
 		video_path = download_video(url)
 		background_task.add_task(delete_file, video_path)
 
