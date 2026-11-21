@@ -12,6 +12,11 @@ It ran as a public website at easyrecipe.online from January to June 2026. It is
     <td><img src="docs/screenshots/instructions.jpg" alt="Recipe steps and estimated nutrition"></td>
     <td><img src="docs/screenshots/home.jpg" alt="Home page with saved recipes and favorites"></td>
   </tr>
+  <tr>
+    <td align="center">Paste a TikTok or Facebook link</td>
+    <td align="center">Steps and estimated nutrition</td>
+    <td align="center">Your recipes and favorites</td>
+  </tr>
 </table>
 
 ## What it does
