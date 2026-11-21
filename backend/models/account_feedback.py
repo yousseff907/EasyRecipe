@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
 from utils.database import Base
 
+
 class AccountFeedback(Base):
 	__tablename__ = "account_feedback"
 

@@ -31,6 +31,7 @@ from weasyprint import HTML
 
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9_.]{3,30}$")
 
+
 def generate_username(db, email: str) -> str:
 	base = re.sub(r"[^A-Za-z0-9_.]", "", email.split('@')[0])[:20]
 	if len(base) < 3:
@@ -40,18 +41,22 @@ def generate_username(db, email: str) -> str:
 		username = base + str(secrets.randbelow(100000))
 	return username
 
-def	delete_file(path: str):
+
+def delete_file(path: str):
 	try:
 		os.remove(path)
 	except FileNotFoundError:
 		pass
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("easyrecipe")
+
 
 def server_error(message: str) -> HTTPException:
 	logger.exception(message)
 	return HTTPException(status_code=500, detail=message)
+
 
 def normalize_email(value: str) -> str:
 	value = value.strip().lower()
@@ -59,11 +64,13 @@ def normalize_email(value: str) -> str:
 		raise ValueError("Invalid email address")
 	return value
 
+
 Email = Annotated[str, AfterValidator(normalize_email)]
 RecipeTitle = Annotated[str, Field(min_length=1, max_length=200)]
 RecipeLine = Annotated[str, Field(max_length=2000)]
 
 app = FastAPI()
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError):
@@ -71,6 +78,7 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
 	field = " ".join(str(part) for part in error["loc"][1:]) or "request"
 	message = error["msg"].removeprefix("Value error, ")
 	return JSONResponse(status_code=422, content={"detail": f"Invalid {field}: {message}"})
+
 
 if CORS_ORIGINS:
 	app.add_middleware(
@@ -81,16 +89,19 @@ if CORS_ORIGINS:
 		allow_headers=["Authorization", "Content-Type"],
 	)
 
+
 class VideoRequest(BaseModel):
 	url: str = Field(max_length=500)
 	instructions: str = Field(default="", max_length=300)
+
 
 class VerificationCode(BaseModel):
 	otp: str = Field(max_length=6)
 	email: Email
 
+
 @app.post("/api/extract")
-def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_current_user), db = Depends(get_db)):
+def extract_recipe(request: VideoRequest, current_user: User = Depends(get_current_user), db=Depends(get_db)):
 	try:
 		url = request.url
 		instructions = request.instructions
@@ -104,7 +115,11 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		if '/photo/' in url:
 			slideshow_data = get_slideshow_data(url)
 			photo_paths = download_slideshow_images(slideshow_data.get("images"))
-			recipe_dictionary = analyze_slideshow_with_ai(f"caption: {slideshow_data.get('caption')}, by: {slideshow_data.get('author')}", photo_paths, instructions)
+			recipe_dictionary = analyze_slideshow_with_ai(
+				f"caption: {slideshow_data.get('caption')}, by: {slideshow_data.get('author')}",
+				photo_paths,
+				instructions,
+			)
 			for photo_path in photo_paths:
 				if os.path.exists(photo_path):
 					os.remove(photo_path)
@@ -119,29 +134,36 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 		if recipe_dictionary == None:
 			raise HTTPException(status_code=400, detail="Video content is not a recipe or is inappropriate")
 
-		unsafe_content = moderate_content(title=recipe_dictionary.get("title"),
-										ingredients = recipe_dictionary.get("ingredients", []),
-										steps = recipe_dictionary.get("steps", []))
+		unsafe_content = moderate_content(
+			title=recipe_dictionary.get("title"),
+			ingredients=recipe_dictionary.get("ingredients", []),
+			steps=recipe_dictionary.get("steps", []),
+		)
 		if unsafe_content == True:
-			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
-								f"Please review and remove inappropriate content"))
+			raise HTTPException(
+				status_code=400,
+				detail=(
+					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+				),
+			)
 
-		recipe = Recipe(user_id = current_user.id,
-						video_url = url,
-						title = recipe_dictionary.get("title"), ingredients = json.dumps(recipe_dictionary.get("ingredients")),
-						steps = json.dumps(recipe_dictionary.get("steps")),
-						prep_time = recipe_dictionary.get("prep_time"),
-						cook_time = recipe_dictionary.get("cook_time"),
-						servings = recipe_dictionary.get("servings"),
-						serving_size = recipe_dictionary.get("serving size"),
-						nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
+		recipe = Recipe(
+			user_id=current_user.id,
+			video_url=url,
+			title=recipe_dictionary.get("title"),
+			ingredients=json.dumps(recipe_dictionary.get("ingredients")),
+			steps=json.dumps(recipe_dictionary.get("steps")),
+			prep_time=recipe_dictionary.get("prep_time"),
+			cook_time=recipe_dictionary.get("cook_time"),
+			servings=recipe_dictionary.get("servings"),
+			serving_size=recipe_dictionary.get("serving size"),
+			nutrition=json.dumps(recipe_dictionary.get("nutrition_per_serving")),
+		)
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
 		print(recipe_dictionary)
-		return {"status": "success",
-				"recipe": recipe_dictionary,
-				"recipe_id": recipe.id}
+		return {"status": "success", "recipe": recipe_dictionary, "recipe_id": recipe.id}
 
 	except HTTPException:
 		raise
@@ -154,9 +176,18 @@ def	extract_recipe(request: VideoRequest, current_user : User = Depends(get_curr
 
 
 @app.get("/api/recipes/{recipe_id}/download-video")
-def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def download_video_endpoint(
+	recipe_id: int,
+	background_task: BackgroundTasks,
+	current_user: User = Depends(get_current_user),
+	db: Session = Depends(get_db),
+):
 	video_path = None
-	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True)).first()
+	recipe = (
+		db.query(Recipe)
+		.filter(Recipe.id == recipe_id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True))
+		.first()
+	)
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	else:
@@ -169,7 +200,9 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 		video_path = download_video(url)
 		background_task.add_task(delete_file, video_path)
 
-		return FileResponse(path=video_path, media_type="video/mp4", filename="recipe_video.mp4", background=background_task)
+		return FileResponse(
+			path=video_path, media_type="video/mp4", filename="recipe_video.mp4", background=background_task
+		)
 
 	except ValueError as e:
 		raise HTTPException(status_code=400, detail=str(e))
@@ -180,38 +213,42 @@ def download_video_endpoint(recipe_id : int, background_task: BackgroundTasks, c
 
 class LoginRequest(BaseModel):
 	email: Email
-	turnstile_token : str
+	turnstile_token: str
+
 
 @app.post("/api/auth/request-code")
-async def	login(body: LoginRequest, request : Request, db : Session = Depends(get_db)):
+async def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
 	user_ip = request.headers.get("CF-Connecting-IP")
 	async with httpx.AsyncClient() as client:
 		response = await client.post(
-					'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-					data={'secret' : TURNSTILE_SECRET_KEY,
-					'response' : body.turnstile_token,
-					'remoteip' : user_ip
-						}
-					)
+			'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+			data={'secret': TURNSTILE_SECRET_KEY, 'response': body.turnstile_token, 'remoteip': user_ip},
+		)
 	result = response.json()
 	if not result.get('success'):
 		raise HTTPException(status_code=400, detail="CAPTCHA verification failed")
 	try:
 		rate_limit = db.query(EmailRateLimit).filter(EmailRateLimit.email == body.email).first()
 		if rate_limit is None:
-			rate_limit = EmailRateLimit(email = body.email)
+			rate_limit = EmailRateLimit(email=body.email)
 			db.add(rate_limit)
 			db.commit()
 			db.refresh(rate_limit)
-		old_verification = db.query(Verification).filter(Verification.email == body.email, Verification.used == False, Verification.expires_at > datetime.now()).first()
+		old_verification = (
+			db.query(Verification)
+			.filter(
+				Verification.email == body.email, Verification.used == False, Verification.expires_at > datetime.now()
+			)
+			.first()
+		)
 		if old_verification != None and old_verification.attempts >= 5:
-			return {"message" : "Too many attempts. Please wait for your code to expire and request a new one."}
+			return {"message": "Too many attempts. Please wait for your code to expire and request a new one."}
 		elif old_verification != None and old_verification.attempts < 5:
-			return {"message" : "A code was already sent to your email. Please check your inbox."}
+			return {"message": "A code was already sent to your email. Please check your inbox."}
 		if rate_limit.last_code_date.date() != date.today():
 			rate_limit.sent_emails = 0
 		if rate_limit.sent_emails >= 3:
-			return {"message" : "You have reached the daily limit of 3 codes. Please try again tomorrow."}
+			return {"message": "You have reached the daily limit of 3 codes. Please try again tomorrow."}
 		rate_limit.sent_emails += 1
 		rate_limit.last_code_date = datetime.now()
 		db.commit()
@@ -225,24 +262,28 @@ async def	login(body: LoginRequest, request : Request, db : Session = Depends(ge
 	except Exception:
 		raise server_error("Could not send the code. Please try again later.")
 
-@app.post("/api/auth/submit-code")
-def	verify(request: VerificationCode, db : Session = Depends(get_db)):
-	try:
 
-		db.query(Verification).filter(Verification.email == request.email, Verification.expires_at < datetime.now()).delete()
+@app.post("/api/auth/submit-code")
+def verify(request: VerificationCode, db: Session = Depends(get_db)):
+	try:
+		db.query(Verification).filter(
+			Verification.email == request.email, Verification.expires_at < datetime.now()
+		).delete()
 		db.commit()
 
-		active_code = db.query(Verification).filter(Verification.email == request.email, Verification.used == False).first()
+		active_code = (
+			db.query(Verification).filter(Verification.email == request.email, Verification.used == False).first()
+		)
 		if active_code is None:
 			raise HTTPException(status_code=400, detail="No active code found. Please request a new one.")
 		if active_code.attempts >= 5:
-			return {"message" : "Too many attempts. Please wait for your code to expire and request a new one."}
+			return {"message": "Too many attempts. Please wait for your code to expire and request a new one."}
 		otp = request.otp
-		verification = db.query(Verification).filter(
-			Verification.email == request.email,
-			Verification.code == otp,
-			Verification.used == False
-		).first()
+		verification = (
+			db.query(Verification)
+			.filter(Verification.email == request.email, Verification.code == otp, Verification.used == False)
+			.first()
+		)
 
 		if not verification:
 			active_code.attempts += 1
@@ -260,7 +301,7 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 			db.refresh(verification)
 			user = db.query(User).filter(User.email == request.email).first()
 			if not user:
-				user = User(email = request.email, username = generate_username(db, request.email))
+				user = User(email=request.email, username=generate_username(db, request.email))
 				db.add(user)
 				db.commit()
 				db.refresh(user)
@@ -269,30 +310,63 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 		raise
 	except Exception:
 		raise server_error("Could not verify the code. Please try again later.")
-	return {"status" : "success", "token" : token}
+	return {"status": "success", "token": token}
+
 
 @app.get("/api/recipes")
-def get_recipes(current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def get_recipes(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.user_id == current_user.id).order_by(Recipe.created_at.desc()).all()
 	recipe_list = []
 	for r in recipe:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": current_user.username})
-	return {"recipes" : recipe_list}
+		recipe_list.append(
+			{
+				"id": r.id,
+				"title": r.title,
+				"is_public": r.is_public,
+				"created_at": r.created_at,
+				"owner_username": current_user.username,
+			}
+		)
+	return {"recipes": recipe_list}
+
 
 @app.get("/api/recipes/favorites")
 def get_favorites(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	recipe_list = []
-	result = db.query(Recipe, User).join(UserFavorites, UserFavorites.recipe_id == Recipe.id).join(User, User.id == Recipe.user_id).filter(UserFavorites.user_id == current_user.id).order_by(UserFavorites.saved_at.desc()).all()
+	result = (
+		db.query(Recipe, User)
+		.join(UserFavorites, UserFavorites.recipe_id == Recipe.id)
+		.join(User, User.id == Recipe.user_id)
+		.filter(UserFavorites.user_id == current_user.id)
+		.order_by(UserFavorites.saved_at.desc())
+		.all()
+	)
 	for r, owner in result:
-		recipe_list.append({"id": r.id, "title": r.title, "is_public": r.is_public, "created_at": r.created_at, "owner_username": owner.username})
+		recipe_list.append(
+			{
+				"id": r.id,
+				"title": r.title,
+				"is_public": r.is_public,
+				"created_at": r.created_at,
+				"owner_username": owner.username,
+			}
+		)
 	return {"recipes": recipe_list}
 
+
 @app.get("/api/recipes/{id}")
-def get_single_recipe(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.id == id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
+def get_single_recipe(id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+	recipe = (
+		db.query(Recipe)
+		.filter(Recipe.id == id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id))
+		.first()
+	)
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
-	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first() is not None
+	is_favorited = (
+		db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first()
+		is not None
+	)
 	owner = db.query(User).filter(User.id == recipe.user_id).first()
 	return {
 		"id": recipe.id,
@@ -305,16 +379,17 @@ def get_single_recipe(id : int, current_user : User = Depends(get_current_user),
 		"nutrition_per_serving": json.loads(recipe.nutrition) if recipe.nutrition else None,
 		"video_url": recipe.video_url,
 		"created_at": recipe.created_at,
-		"is_public" : recipe.is_public,
-		"owner_id" : recipe.user_id,
-		"current_user_id" : current_user.id,
-		"is_favorited" : is_favorited,
+		"is_public": recipe.is_public,
+		"owner_id": recipe.user_id,
+		"current_user_id": current_user.id,
+		"is_favorited": is_favorited,
 		"serving_size": recipe.serving_size,
-		"owner_username": owner.username if owner else "unknown"
-		}
+		"owner_username": owner.username if owner else "unknown",
+	}
+
 
 @app.delete("/api/recipes/{id}")
-def delete_recipe(id : int, current_user : User = Depends(get_current_user), db = Depends(get_db)):
+def delete_recipe(id: int, current_user: User = Depends(get_current_user), db=Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
@@ -331,36 +406,45 @@ class NutritionInput(BaseModel):
 	carbs_g: int | None = None
 	fat_g: int | None = None
 
+
 class SelfMadeRecipe(BaseModel):
-	title : RecipeTitle
-	ingredients : list[RecipeLine] = Field(max_length=100)
-	steps : list[RecipeLine] = Field(max_length=50)
-	prep_time : int | None = None
-	cook_time : int | None = None
-	servings : int | None = None
-	serving_size : str | None = Field(default=None, max_length=50)
-	nutrition : NutritionInput | None = None
+	title: RecipeTitle
+	ingredients: list[RecipeLine] = Field(max_length=100)
+	steps: list[RecipeLine] = Field(max_length=50)
+	prep_time: int | None = None
+	cook_time: int | None = None
+	servings: int | None = None
+	serving_size: str | None = Field(default=None, max_length=50)
+	nutrition: NutritionInput | None = None
+
 
 @app.post("/api/make_your_own")
-def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def make_your_own(
+	self_made: SelfMadeRecipe, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
 	try:
-		unsafe_content = moderate_content(title=self_made.title,
-										ingredients = self_made.ingredients,
-										steps = self_made.steps)
+		unsafe_content = moderate_content(
+			title=self_made.title, ingredients=self_made.ingredients, steps=self_made.steps
+		)
 		if unsafe_content == True:
-			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
-								f"Please review and remove inappropriate content"))
-		recipe = Recipe(user_id = current_user.id,
-						video_url = "",
-						title = self_made.title,
-						ingredients = json.dumps(self_made.ingredients),
-						steps = json.dumps(self_made.steps),
-						prep_time = self_made.prep_time,
-						cook_time = self_made.cook_time,
-						servings = self_made.servings,
-						serving_size = self_made.serving_size,
-						nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition else None
-						)
+			raise HTTPException(
+				status_code=400,
+				detail=(
+					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+				),
+			)
+		recipe = Recipe(
+			user_id=current_user.id,
+			video_url="",
+			title=self_made.title,
+			ingredients=json.dumps(self_made.ingredients),
+			steps=json.dumps(self_made.steps),
+			prep_time=self_made.prep_time,
+			cook_time=self_made.cook_time,
+			servings=self_made.servings,
+			serving_size=self_made.serving_size,
+			nutrition=json.dumps(self_made.nutrition.model_dump()) if self_made.nutrition else None,
+		)
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
@@ -373,40 +457,52 @@ def make_your_own(self_made : SelfMadeRecipe, current_user : User = Depends(get_
 
 
 class AIRecipe(BaseModel):
-	ingredients : list[Annotated[str, Field(max_length=200)]] = Field(max_length=100)
-	instructions : str = Field(default="", max_length=300)
+	ingredients: list[Annotated[str, Field(max_length=200)]] = Field(max_length=100)
+	instructions: str = Field(default="", max_length=300)
+
 
 @app.post("/api/make_your_own_with_ai")
-def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def make_your_own_with_ai(
+	request: AIRecipe, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
 	try:
 		recipe_dictionary = build_ai_recipe(request.instructions, request.ingredients)
 		if recipe_dictionary == None:
-			raise HTTPException(status_code=400, detail="Could not build a recipe from this request. Please check your ingredients and instructions.")
+			raise HTTPException(
+				status_code=400,
+				detail="Could not build a recipe from this request. Please check your ingredients and instructions.",
+			)
 
-		unsafe_content = moderate_content(title=recipe_dictionary.get("title"),
-										ingredients = recipe_dictionary.get("ingredients", []),
-										steps = recipe_dictionary.get("steps", []))
+		unsafe_content = moderate_content(
+			title=recipe_dictionary.get("title"),
+			ingredients=recipe_dictionary.get("ingredients", []),
+			steps=recipe_dictionary.get("steps", []),
+		)
 		if unsafe_content == True:
-			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
-								f"Please review and remove inappropriate content"))
+			raise HTTPException(
+				status_code=400,
+				detail=(
+					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+				),
+			)
 
-		recipe = Recipe(user_id = current_user.id,
-						video_url = "",
-						title = recipe_dictionary.get("title"),
-						ingredients = json.dumps(recipe_dictionary.get("ingredients")),
-						steps = json.dumps(recipe_dictionary.get("steps")),
-						prep_time = recipe_dictionary.get("prep_time"),
-						cook_time = recipe_dictionary.get("cook_time"),
-						servings = recipe_dictionary.get("servings"),
-						serving_size = recipe_dictionary.get("serving size"),
-						nutrition = json.dumps(recipe_dictionary.get("nutrition_per_serving")))
+		recipe = Recipe(
+			user_id=current_user.id,
+			video_url="",
+			title=recipe_dictionary.get("title"),
+			ingredients=json.dumps(recipe_dictionary.get("ingredients")),
+			steps=json.dumps(recipe_dictionary.get("steps")),
+			prep_time=recipe_dictionary.get("prep_time"),
+			cook_time=recipe_dictionary.get("cook_time"),
+			servings=recipe_dictionary.get("servings"),
+			serving_size=recipe_dictionary.get("serving size"),
+			nutrition=json.dumps(recipe_dictionary.get("nutrition_per_serving")),
+		)
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
 		print(recipe_dictionary)
-		return {"status": "success",
-				"recipe": recipe_dictionary,
-				"recipe_id": recipe.id}
+		return {"status": "success", "recipe": recipe_dictionary, "recipe_id": recipe.id}
 
 	except HTTPException:
 		raise
@@ -419,15 +515,21 @@ def make_your_own_with_ai(request : AIRecipe, current_user : User = Depends(get_
 
 
 class Feedback(BaseModel):
-	feedback : str = Field(max_length=500)
+	feedback: str = Field(max_length=500)
+
 
 @app.delete("/api/delete_account")
-def delete_account(request : Feedback, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def delete_account(request: Feedback, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	try:
 		unsafe_feedback = moderate_content(addon=request.feedback)
 		if unsafe_feedback == True:
-			raise HTTPException(status_code=400, detail=(f"Feedback content violates our community guidelines. "
-								f"Please review and remove inappropriate content"))
+			raise HTTPException(
+				status_code=400,
+				detail=(
+					f"Feedback content violates our community guidelines. "
+					f"Please review and remove inappropriate content"
+				),
+			)
 
 		if request.feedback.strip():
 			db.add(AccountFeedback(feedback=request.feedback.strip()))
@@ -442,28 +544,38 @@ def delete_account(request : Feedback, current_user : User = Depends(get_current
 		db.rollback()
 		raise server_error("Could not delete the account. Please try again later.")
 
+
 @app.get("/api/user/me")
-def get_current_user_info(current_user: User = Depends(get_current_user), db : Session = Depends(get_db)):
+def get_current_user_info(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	return {
 		"id": current_user.id,
 		"email": current_user.email,
 		"username": current_user.username,
 		"bio": current_user.bio,
-		"public_recipe_count" : db.query(Recipe).filter(Recipe.user_id == current_user.id, Recipe.is_public == True).count()
+		"public_recipe_count": db.query(Recipe)
+		.filter(Recipe.user_id == current_user.id, Recipe.is_public == True)
+		.count(),
 	}
 
 
 class Username(BaseModel):
-	string : str = Field(max_length=30)
+	string: str = Field(max_length=30)
+
 
 @app.post("/api/change_username")
-def change_username(request : Username, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def change_username(request: Username, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	if not USERNAME_PATTERN.fullmatch(request.string):
-		raise HTTPException(status_code=400, detail="Username must be 3-30 characters: letters, numbers, underscores and dots only")
+		raise HTTPException(
+			status_code=400, detail="Username must be 3-30 characters: letters, numbers, underscores and dots only"
+		)
 	unsafe_username = moderate_content(addon=request.string)
 	if unsafe_username == True:
-		raise HTTPException(status_code=400, detail=(f"Username content violates our community guidelines. "
-										f"Please review and remove inappropriate content"))
+		raise HTTPException(
+			status_code=400,
+			detail=(
+				f"Username content violates our community guidelines. Please review and remove inappropriate content"
+			),
+		)
 	existing = db.query(User).filter(User.username == request.string).first()
 	if existing:
 		raise HTTPException(status_code=400, detail="Username already taken")
@@ -474,100 +586,157 @@ def change_username(request : Username, current_user : User = Depends(get_curren
 
 
 class Bio(BaseModel):
-	string : str = Field(max_length=200, default="")
+	string: str = Field(max_length=200, default="")
+
 
 @app.post("/api/change_bio")
-def change_bio(request : Bio, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def change_bio(request: Bio, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	unsafe_bio = moderate_content(addon=request.string)
 	if unsafe_bio == True:
-		raise HTTPException(status_code=400, detail=(f"Bio content violates our community guidelines. "
-										f"Please review and remove inappropriate content"))
+		raise HTTPException(
+			status_code=400,
+			detail=(f"Bio content violates our community guidelines. Please review and remove inappropriate content"),
+		)
 	current_user.bio = request.string
 	db.commit()
 	db.refresh(current_user)
 	return {"message": "success"}
 
+
 @app.patch("/api/recipes/{id}")
-def change_recipe_status(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+def change_recipe_status(id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == id, current_user.id == Recipe.user_id).first()
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	recipe.is_public = not recipe.is_public
 	db.commit()
 	db.refresh(recipe)
-	return {"is_public" : recipe.is_public}
+	return {"is_public": recipe.is_public}
+
 
 @app.post("/api/recipes/{id}/favorite")
-def save_recipe_as_favorite(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
-	existing = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first()
+def save_recipe_as_favorite(id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+	existing = (
+		db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == id).first()
+	)
 	if existing:
 		raise HTTPException(status_code=400, detail="Recipe already saved")
-	recipe = db.query(Recipe).filter(Recipe.id == id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True)).first()
+	recipe = (
+		db.query(Recipe)
+		.filter(Recipe.id == id, or_(Recipe.user_id == current_user.id, Recipe.is_public == True))
+		.first()
+	)
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
-	user_favorite = UserFavorites(user_id = current_user.id, recipe_id = id)
+	user_favorite = UserFavorites(user_id=current_user.id, recipe_id=id)
 	db.add(user_favorite)
 	db.commit()
 	db.refresh(user_favorite)
-	return {"status": "success", "saved_at" : user_favorite.saved_at}
+	return {"status": "success", "saved_at": user_favorite.saved_at}
+
 
 @app.delete("/api/recipes/{id}/favorite")
-def unsave_recipe_from_favorite(id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
-	user_favorite = db.query(UserFavorites).filter(UserFavorites.recipe_id == id, UserFavorites.user_id == current_user.id).first()
+def unsave_recipe_from_favorite(id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+	user_favorite = (
+		db.query(UserFavorites).filter(UserFavorites.recipe_id == id, UserFavorites.user_id == current_user.id).first()
+	)
 	if user_favorite is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	db.delete(user_favorite)
 	db.commit()
-	return {"message" : "Recipe removed from favorites"}
+	return {"message": "Recipe removed from favorites"}
+
 
 @app.get("/api/search")
-def search(query: str, type: str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+def search(query: str, type: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
 	if type == "recipes":
-		result = db.query(Recipe, User).join(User, User.id == Recipe.user_id).filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
+		result = (
+			db.query(Recipe, User)
+			.join(User, User.id == Recipe.user_id)
+			.filter(Recipe.title.like(f"%{query}%"), Recipe.is_public == True)
+			.order_by(Recipe.created_at.desc())
+			.all()
+		)
 		if not result:
-			return {"message" : "No matches were found."}
+			return {"message": "No matches were found."}
 		recipe_list = []
 		for r, owner in result:
-			recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": owner.username if owner else "unknown"})
-		return {"recipes" : recipe_list}
-	
+			recipe_list.append(
+				{
+					"id": r.id,
+					"title": r.title,
+					"is_public": r.is_public,
+					"created_at": r.created_at,
+					"owner_username": owner.username if owner else "unknown",
+				}
+			)
+		return {"recipes": recipe_list}
+
 	if type == "users":
 		users = db.query(User).filter(User.username.like(f"%{query}%")).all()
 		if not users:
-			return {"message" : "No matches were found."}
+			return {"message": "No matches were found."}
 		user_list = []
 		for u in users:
-			user_list.append({"username" : u.username})
-		return {"users" : user_list}
+			user_list.append({"username": u.username})
+		return {"users": user_list}
+
 
 @app.get("/api/user/{username}")
-def get_user_info(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_user_info(username: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
 	user = db.query(User).filter(User.username == username).first()
 	if user is None:
 		raise HTTPException(status_code=404, detail="User not found")
-	return {"id" : user.id,
-			"username" : username,
-			"bio" : user.bio,
-			"public_recipe_count" : db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).count()
-			}
+	return {
+		"id": user.id,
+		"username": username,
+		"bio": user.bio,
+		"public_recipe_count": db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).count(),
+	}
+
 
 @app.get("/api/user/{username}/recipes")
-def get_user_recipes(username : str, db : Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_user_recipes(username: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
 	user = db.query(User).filter(User.username == username).first()
 	if user is None:
 		raise HTTPException(status_code=404, detail="User not found")
-	recipes = db.query(Recipe).filter(Recipe.user_id == user.id, Recipe.is_public == True).order_by(Recipe.created_at.desc()).all()
+	recipes = (
+		db.query(Recipe)
+		.filter(Recipe.user_id == user.id, Recipe.is_public == True)
+		.order_by(Recipe.created_at.desc())
+		.all()
+	)
 	recipe_list = []
 	for r in recipes:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": user.username})
-	return {"recipes" : recipe_list}
+		recipe_list.append(
+			{
+				"id": r.id,
+				"title": r.title,
+				"is_public": r.is_public,
+				"created_at": r.created_at,
+				"owner_username": user.username,
+			}
+		)
+	return {"recipes": recipe_list}
+
 
 @app.get("/api/user/{username}/recipes/{recipe_id}")
-def get_user_recipe(username : str, recipe_id : int, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
-	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id)).first()
+def get_user_recipe(
+	username: str, recipe_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
+	recipe = (
+		db.query(Recipe)
+		.filter(Recipe.id == recipe_id, or_(Recipe.is_public == True, Recipe.user_id == current_user.id))
+		.first()
+	)
 	if recipe is None:
 		raise HTTPException(status_code=404, detail="Recipe not found")
-	is_favorited = db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == recipe_id).first() is not None
+	is_favorited = (
+		db.query(UserFavorites)
+		.filter(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id == recipe_id)
+		.first()
+		is not None
+	)
 	return {
 		"id": recipe.id,
 		"title": recipe.title,
@@ -579,44 +748,50 @@ def get_user_recipe(username : str, recipe_id : int, current_user : User = Depen
 		"nutrition_per_serving": json.loads(recipe.nutrition) if recipe.nutrition else None,
 		"video_url": recipe.video_url,
 		"created_at": recipe.created_at,
-		"is_public" : recipe.is_public,
-		"owner_id" : recipe.user_id,
-		"current_user_id" : current_user.id,
-		"is_favorited" : is_favorited,
+		"is_public": recipe.is_public,
+		"owner_id": recipe.user_id,
+		"current_user_id": current_user.id,
+		"is_favorited": is_favorited,
 		"serving_size": recipe.serving_size,
-		"owner_username": username
-		}
+		"owner_username": username,
+	}
 
 
 templates = Jinja2Templates(directory="templates")
 
+
 @app.get("/r/{id}")
-def get_public_recipe(rq : Request, id : int, db : Session = Depends(get_db)):
+def get_public_recipe(rq: Request, id: int, db: Session = Depends(get_db)):
 	try:
 		recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
 		if recipe is None:
 			raise HTTPException(status_code=404, detail="Recipe Not Found")
 		owner = db.query(User).filter(User.id == recipe.user_id).first()
 		if owner is None:
-				raise HTTPException(status_code=404, detail="Recipe Not Found")
+			raise HTTPException(status_code=404, detail="Recipe Not Found")
 		nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
-		return templates.TemplateResponse(name="recipe_public.html", request=rq, context={
-			"title": recipe.title,
-			"recipe_id": recipe.id,
-			"owner_username": owner.username,
-			"prep_time": recipe.prep_time,
-			"cook_time": recipe.cook_time,
-			"servings": recipe.servings,
-			"serving_size": recipe.serving_size,
-			"ingredients": json.loads(recipe.ingredients),
-			"steps": json.loads(recipe.steps),
-			"nutrition": nutrition,
-			"site_url": SITE_URL
-		})
+		return templates.TemplateResponse(
+			name="recipe_public.html",
+			request=rq,
+			context={
+				"title": recipe.title,
+				"recipe_id": recipe.id,
+				"owner_username": owner.username,
+				"prep_time": recipe.prep_time,
+				"cook_time": recipe.cook_time,
+				"servings": recipe.servings,
+				"serving_size": recipe.serving_size,
+				"ingredients": json.loads(recipe.ingredients),
+				"steps": json.loads(recipe.steps),
+				"nutrition": nutrition,
+				"site_url": SITE_URL,
+			},
+		)
 	except HTTPException:
 		raise
 	except Exception:
 		raise
+
 
 class RecipeEdit(BaseModel):
 	title: RecipeTitle
@@ -628,18 +803,23 @@ class RecipeEdit(BaseModel):
 	serving_size: str | None = Field(default=None, max_length=50)
 	nutrition: NutritionInput | None = None
 
+
 @app.patch("/api/recipes/{id}/edit")
-def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+def edit_recipe(
+	request: RecipeEdit, id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
 	try:
 		recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
 		if recipe is None:
 			raise HTTPException(status_code=404, detail="Recipe Not Found")
-		unsafe_content = moderate_content(title=request.title,
-										ingredients = request.ingredients,
-										steps = request.steps)
+		unsafe_content = moderate_content(title=request.title, ingredients=request.ingredients, steps=request.steps)
 		if unsafe_content == True:
-			raise HTTPException(status_code=400, detail=(f"Recipe content violates our community guidelines. "
-								f"Please review and remove inappropriate content"))
+			raise HTTPException(
+				status_code=400,
+				detail=(
+					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+				),
+			)
 		recipe.title = request.title
 		recipe.ingredients = json.dumps(request.ingredients)
 		recipe.steps = json.dumps(request.steps)
@@ -650,39 +830,53 @@ def edit_recipe(request : RecipeEdit, id : int, db : Session = Depends(get_db), 
 		recipe.nutrition = json.dumps(request.nutrition.model_dump()) if request.nutrition else None
 		db.commit()
 		db.refresh(recipe)
-		return {"status" : "success"}
+		return {"status": "success"}
 	except HTTPException:
 		raise
 	except Exception:
 		db.rollback()
 		raise server_error("Could not save the recipe. Please try again later.")
-	
+
+
 @app.get("/api/feed")
-def get_feed(db : Session = Depends(get_db)):
-	result = db.query(Recipe, User).join(User, User.id == Recipe.user_id).filter(Recipe.is_public == True).order_by(Recipe.created_at.desc()).limit(3).all()
+def get_feed(db: Session = Depends(get_db)):
+	result = (
+		db.query(Recipe, User)
+		.join(User, User.id == Recipe.user_id)
+		.filter(Recipe.is_public == True)
+		.order_by(Recipe.created_at.desc())
+		.limit(3)
+		.all()
+	)
 	recipe_list = []
 	for r, owner in result:
-			recipe_list.append({
-				"id": r.id,
-				"title": r.title,
-				"prep_time": r.prep_time,
-				"owner_username": owner.username
-			})
+		recipe_list.append({"id": r.id, "title": r.title, "prep_time": r.prep_time, "owner_username": owner.username})
 	return {"recipes": recipe_list}
 
+
 @app.get("/api/public/recipes")
-def get_all_public_recipes(db : Session = Depends(get_db)):
+def get_all_public_recipes(db: Session = Depends(get_db)):
 	recipes = db.query(Recipe).filter(Recipe.is_public == True).all()
 	recipe_list = []
 	for r in recipes:
-		recipe_list.append({"id" : r.id, "title" : r.title, "is_public" : r.is_public, "created_at": r.created_at, "owner_username": r.owner.username})
-	return {"recipes" : recipe_list}
+		recipe_list.append(
+			{
+				"id": r.id,
+				"title": r.title,
+				"is_public": r.is_public,
+				"created_at": r.created_at,
+				"owner_username": r.owner.username,
+			}
+		)
+	return {"recipes": recipe_list}
+
 
 class GoogleAuth(BaseModel):
-	token : str
+	token: str
+
 
 @app.post("/api/auth/google")
-def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
+def login_with_google(body: GoogleAuth, db: Session = Depends(get_db)):
 	try:
 		idinfo = id_token.verify_oauth2_token(body.token, google_requests.Request(), GOOGLE_CLIENT_ID)
 	except (ValueError, GoogleAuthError):
@@ -695,7 +889,7 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 	try:
 		user = db.query(User).filter(User.email == email).first()
 		if not user:
-			user = User(email = email, username = generate_username(db, email))
+			user = User(email=email, username=generate_username(db, email))
 			db.add(user)
 			db.commit()
 			db.refresh(user)
@@ -706,14 +900,12 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 		raise server_error("Could not sign in with Google. Please try again later.")
 
 
-
-
-
 def block_all_urls(url):
 	raise ValueError(f"External resources are disabled in PDFs: {url}")
 
+
 @app.get("/api/recipes/{recipe_id}/pdf")
-def download_pdf(recipe_id : int, db : Session = Depends(get_db)):
+def download_pdf(recipe_id: int, db: Session = Depends(get_db)):
 	recipe = db.query(Recipe).filter(Recipe.id == recipe_id, Recipe.is_public == True).first()
 	if not recipe:
 		raise HTTPException(status_code=404, detail="Recipe not found")
@@ -734,6 +926,6 @@ def download_pdf(recipe_id : int, db : Session = Depends(get_db)):
 
 	pdf = HTML(string=html_content, url_fetcher=block_all_urls).write_pdf()
 
-	return Response(content=pdf, media_type="application/pdf", headers={
-		"Content-Disposition": "attachment; filename=recipe.pdf"
-	})
+	return Response(
+		content=pdf, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=recipe.pdf"}
+	)

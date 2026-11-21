@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Foreign
 from datetime import datetime
 from utils.database import Base
 
+
 class Verification(Base):
 	__tablename__ = "verifications"
 

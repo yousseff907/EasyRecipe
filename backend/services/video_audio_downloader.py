@@ -8,6 +8,7 @@ from utils.validators import validate_video_url
 
 SHORT_LINK_HOSTS = ('fb.watch',)
 
+
 def resolve_short_link(url, max_hops=3):
 	for _ in range(max_hops):
 		host = urlparse(url).hostname or ''
@@ -22,6 +23,7 @@ def resolve_short_link(url, max_hops=3):
 		validate_video_url(url)
 	raise ValueError("Too many redirects. Please paste the full video link.")
 
+
 def download_audio(url):
 	try:
 		file_id = str(uuid.uuid4())
@@ -29,15 +31,18 @@ def download_audio(url):
 		subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",
+				"--ies",
+				"default,-generic",
 				"-x",
-				"--audio-format", "m4a",
+				"--audio-format",
+				"m4a",
 				"--no-playlist",
 				"--restrict-filenames",
-				"-o", audio_path,
-				url
+				"-o",
+				audio_path,
+				url,
 			],
-			check=True
+			check=True,
 		)
 
 		if not os.path.exists(audio_path):
@@ -56,14 +61,17 @@ def download_video(url):
 		subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",
+				"--ies",
+				"default,-generic",
 				"--no-playlist",
 				"--restrict-filenames",
-				"-f", "bv*+ba/b",
-				"-o", video_path,
-				url
+				"-f",
+				"bv*+ba/b",
+				"-o",
+				video_path,
+				url,
 			],
-			check=True
+			check=True,
 		)
 
 		if not os.path.exists(video_path):
@@ -74,19 +82,22 @@ def download_video(url):
 	except subprocess.CalledProcessError as e:
 		raise RuntimeError("Video download failed") from e
 
+
 def get_caption(url):
 	try:
 		result = subprocess.run(
 			[
 				"yt-dlp",
-				"--ies", "default,-generic",
+				"--ies",
+				"default,-generic",
 				"--skip-download",
-				"--print", "%(description)s\nBy: %(uploader)s",
-				url
+				"--print",
+				"%(description)s\nBy: %(uploader)s",
+				url,
 			],
 			check=True,
 			capture_output=True,
-			text=True
+			text=True,
 		)
 
 		caption = result.stdout.strip()
@@ -94,7 +105,8 @@ def get_caption(url):
 
 	except subprocess.CalledProcessError as e:
 		raise RuntimeError("Failed to fetch caption") from e
-	
+
+
 def get_slideshow_data(url):
 	try:
 		response = requests.get("https://tikwm.com/api/", params={"url": url}, timeout=30)
@@ -104,11 +116,12 @@ def get_slideshow_data(url):
 		return {
 			"caption": data["data"]["title"],
 			"images": data["data"]["images"],
-			"author": data["data"]["author"]["unique_id"]
-        }
+			"author": data["data"]["author"]["unique_id"],
+		}
 	except Exception as e:
 		raise RuntimeError("Failed to fetch slideshow data") from e
-	
+
+
 def download_slideshow_images(image_urls):
 	image_paths = []
 	for index, image_url in enumerate(image_urls[:25]):

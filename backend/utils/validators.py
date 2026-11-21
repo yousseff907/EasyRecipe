@@ -1,44 +1,38 @@
 from urllib.parse import urlparse
 
 DANGEROUS_CHARS = [
-    # Script injection
-    '<',
-    '>',
-    '"',
-    "'",
-    
-    # Command injection
-    ';',
-    '|',
-    '`',
-    '$(',
-    '${',
-    
-    # Path traversal
-    '..',
-    '\\',
-    
-    # Null bytes
-    '\0',
-    '%00',
-    
-    # Protocol exploits
-    'javascript:',
-    'data:',
-    'file:',
-    'vbscript:',
-    'about:',
-    
-    # Additional command chars
-    '\n',  # newline
-    '\r',  # carriage return
-    '&&',  # command chain
-    '||',  # command OR
-    
-    # Format string attacks
-    '%n',
-    '%s',
-    '%x',
+	# Script injection
+	'<',
+	'>',
+	'"',
+	"'",
+	# Command injection
+	';',
+	'|',
+	'`',
+	'$(',
+	'${',
+	# Path traversal
+	'..',
+	'\\',
+	# Null bytes
+	'\0',
+	'%00',
+	# Protocol exploits
+	'javascript:',
+	'data:',
+	'file:',
+	'vbscript:',
+	'about:',
+	# Additional command chars
+	'\n',  # newline
+	'\r',  # carriage return
+	'&&',  # command chain
+	'||',  # command OR
+	# Format string attacks
+	'%n',
+	'%s',
+	'%x',
 ]
 
 ALLOWED_DOMAINS = {
@@ -49,6 +43,7 @@ ALLOWED_DOMAINS = {
 }
 
 BLOCKED_HOSTS = {'l.facebook.com', 'lm.facebook.com'}
+
 
 def is_valid_url(url) -> bool:
 	if not (url.startswith('http://') or url.startswith('https://')):
@@ -91,7 +86,9 @@ def validate_video_url(url):
 	if not is_valid_url(url):
 		raise ValueError("URL format invalid or contains dangerous characters")
 	if not is_supported_platform(url):
-		raise ValueError("Platform not supported. Use TikTok or Facebook. Instagram is currently unavailable due to platform restrictions.")
+		raise ValueError(
+			"Platform not supported. Use TikTok or Facebook. Instagram is currently unavailable due to platform restrictions."
+		)
 	parsed = urlparse(url)
 	if len(parsed.path) < 2:
 		raise ValueError("URL doesn't appear to link to a video. Please paste a direct video link.")

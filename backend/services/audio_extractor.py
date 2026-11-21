@@ -1,5 +1,6 @@
 import whisper
 
+
 def extract_transcript(path: str):
 	try:
 		model = whisper.load_model("base")

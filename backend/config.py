@@ -16,8 +16,7 @@ REQUIRED = [
 missing = [name for name in REQUIRED if not os.getenv(name, '').strip()]
 if missing:
 	raise SystemExit(
-		f"Missing required environment variables: {', '.join(missing)}. "
-		"Set them in .env (see .env.example)."
+		f"Missing required environment variables: {', '.join(missing)}. Set them in .env (see .env.example)."
 	)
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')

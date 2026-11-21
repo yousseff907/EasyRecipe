@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from utils.database import Base
 
+
 class Recipe(Base):
 	__tablename__ = "recipes"
 
@@ -18,5 +19,5 @@ class Recipe(Base):
 	serving_size = Column(String, nullable=True)
 	nutrition = Column(Text)
 	created_at = Column(DateTime, default=datetime.now)
-	is_public = Column(Boolean, nullable = False, default = False)
+	is_public = Column(Boolean, nullable=False, default=False)
 	owner = relationship("User", back_populates="recipes")
