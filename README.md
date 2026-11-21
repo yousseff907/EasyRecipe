@@ -86,6 +86,16 @@ Local mode sets `DEV_MODE=1` for you. Don't set it in production.
 
 `make fclean` and `make re` delete every unused Docker image, container and volume on the machine, including ones from other projects.
 
+## Changing the styles
+
+The pages use Tailwind CSS v3. `frontend/output.css` is built from `frontend/input.css` and `frontend/tailwind.config.js`, which scans the HTML pages, the scripts in `frontend/js/` and the backend's public recipe template for class names. After adding or changing classes, rebuild it and commit the new `output.css`:
+
+```bash
+npx tailwindcss@3.4.1 -c frontend/tailwind.config.js -i frontend/input.css -o frontend/output.css --minify
+```
+
+The standalone Tailwind CLI from Tailwind's GitHub releases takes the same arguments if you'd rather not use npm.
+
 ## Linting
 
 Python is formatted and linted with ruff, configured in `ruff.toml`:
