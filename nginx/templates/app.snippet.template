@@ -27,6 +27,12 @@ location /cgi-bin/ {
 
 error_page 404 /404.html;
 error_page 500 502 503 504 /404.html;
+error_page 429 = @rate_limited;
+
+location @rate_limited {
+	default_type application/json;
+	return 429 '{"detail":"Too many requests. Please wait a minute and try again."}';
+}
 
 location = /404.html {
 	root /usr/share/nginx/html;
@@ -59,6 +65,9 @@ location / {
 }
 
 location /api/ {
+	limit_req zone=api burst=100 nodelay;
+	limit_req zone=heavy burst=3 nodelay;
+	limit_req zone=auth burst=5 nodelay;
 	proxy_pass http://backend:8000;
 	proxy_read_timeout 300s;
 	proxy_send_timeout 300s;
