@@ -1,10 +1,13 @@
 import resend
-from config import RESEND_API_KEY, EMAIL_FROM
+from config import RESEND_API_KEY, EMAIL_FROM, DEV_MODE
 
 resend.api_key = RESEND_API_KEY
 
 
 def send_email(email: str, code: str):
+	if DEV_MODE:
+		print(f"[DEV_MODE] Login code for {email}: {code}", flush=True)
+		return None
 	try:
 		html_content = f"""
 		<!DOCTYPE html>

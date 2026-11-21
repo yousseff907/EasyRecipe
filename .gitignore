@@ -1,5 +1,6 @@
 # Database
 backend/database.db
+backend/database.dev.db
 
 # Environment variables
 .env

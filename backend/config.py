@@ -3,15 +3,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEV_MODE = os.getenv('DEV_MODE', '') == '1'
+
 REQUIRED = [
 	'GEMINI_API_KEY',
 	'OPENAI_API_KEY',
-	'RESEND_API_KEY',
 	'JWT_SECRET_KEY',
 	'DATABASE_URL',
 	'TURNSTILE_SECRET_KEY',
 	'GOOGLE_CLIENT_ID',
 ]
+if not DEV_MODE:
+	REQUIRED.append('RESEND_API_KEY')
 
 missing = [name for name in REQUIRED if not os.getenv(name, '').strip()]
 if missing:
