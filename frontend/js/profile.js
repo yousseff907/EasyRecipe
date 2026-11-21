@@ -3,7 +3,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	// Get username from URL path e.g. /user/youssef
 	const pathParts = window.location.pathname.split('/');
-	const username = pathParts[pathParts.length - 1];
+	let username = '';
+	try {
+		username = decodeURIComponent(pathParts[pathParts.length - 1]);
+	} catch (e) {
+		username = '';
+	}
 
 	if (!username) {
 		window.location.href = '/search';
@@ -16,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function loadProfile(username) {
 	const token = localStorage.getItem('auth_token');
 
-	fetch(`${API_URL}/api/user/${username}`, {
+	fetch(`${API_URL}/api/user/${encodeURIComponent(username)}`, {
 		method: 'GET',
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
@@ -56,7 +61,7 @@ function loadProfile(username) {
 }
 
 function loadUserRecipes(username, token) {
-	fetch(`${API_URL}/api/user/${username}/recipes`, {
+	fetch(`${API_URL}/api/user/${encodeURIComponent(username)}/recipes`, {
 		method: 'GET',
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
@@ -75,7 +80,7 @@ function loadUserRecipes(username, token) {
 
 			data.recipes.forEach(recipe => {
 				const card = createRecipeCard(recipe, () => viewRecipe(recipe.id));
-				card.onclick = () => window.location.href = `/recipe?id=${recipe.id}&username=${username}`;
+				card.onclick = () => window.location.href = `/recipe?id=${encodeURIComponent(recipe.id)}&username=${encodeURIComponent(username)}`;
 
 				grid.appendChild(card);
 			});

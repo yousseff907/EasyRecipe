@@ -2,6 +2,17 @@
 
 const API_URL = '';
 
+// Escape text before putting it inside an HTML template string.
+// Anything that comes from the server (titles, usernames, ingredients...) must go through this.
+function escapeHtml(value) {
+	return String(value ?? '')
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 // Check authentication and redirect if not logged in
 function checkAuth() {
 	let token = localStorage.getItem('auth_token');
@@ -113,8 +124,8 @@ function createRecipeCard(recipe, onclick) {
 	card.onclick = onclick;
 	card.innerHTML = `
 		<div class="p-6 flex-1">
-			<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2 break-words">${recipe.title || 'Untitled Recipe'}</h3>
-			${recipe.owner_username ? `<p class="text-xs text-pink-dark mb-2 truncate">by @${recipe.owner_username}</p>` : ''}
+			<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2 break-words">${escapeHtml(recipe.title || 'Untitled Recipe')}</h3>
+			${recipe.owner_username ? `<p class="text-xs text-pink-dark mb-2 truncate">by @${escapeHtml(recipe.owner_username)}</p>` : ''}
 			<p class="text-xs text-gray-500">
 				Created ${recipe.created_at ? new Date(recipe.created_at + 'Z').toLocaleDateString() : ''}
 			</p>
@@ -122,7 +133,7 @@ function createRecipeCard(recipe, onclick) {
 		<div class="bg-pink-light px-6 py-3 flex items-center justify-between">
 			<span class="text-pink-dark font-semibold text-sm">View Recipe →</span>
 			${recipe.is_public ? `
-			<button onclick="event.stopPropagation(); shareRecipe(${recipe.id})" 
+			<button onclick="event.stopPropagation(); shareRecipe(${Number(recipe.id)})"
 				class="text-pink-dark hover:text-pink-medium transition p-1">
 				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />

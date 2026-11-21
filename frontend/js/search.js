@@ -134,15 +134,15 @@ function displayUsers(users) {
 	users.forEach(user => {
 		const card = document.createElement('div');
 		card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer overflow-hidden border border-gray-100';
-		card.onclick = () => window.location.href = `/user/${user.username}`;
+		card.onclick = () => window.location.href = `/user/${encodeURIComponent(user.username)}`;
 
 		card.innerHTML = `
 			<div class="p-6 flex items-center gap-4">
 				<div class="w-12 h-12 rounded-full bg-pink-light flex items-center justify-center text-pink-dark font-bold text-xl">
-					${user.username.charAt(0).toUpperCase()}
+					${escapeHtml(user.username.charAt(0).toUpperCase())}
 				</div>
 				<div>
-					<h3 class="text-lg font-bold text-gray-800">@${user.username}</h3>
+					<h3 class="text-lg font-bold text-gray-800">@${escapeHtml(user.username)}</h3>
 				</div>
 			</div>
 			<div class="bg-pink-light px-6 py-3 text-pink-dark font-semibold text-sm">

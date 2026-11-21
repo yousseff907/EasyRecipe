@@ -57,7 +57,7 @@ function loadRecipeFromProfile(recipeId, username) {
 	document.getElementById('loading').classList.remove('hidden');
 	document.getElementById('recipeContent').classList.add('hidden');
 
-	fetch(`${API_URL}/api/user/${username}/recipes/${recipeId}`, {
+	fetch(`${API_URL}/api/user/${encodeURIComponent(username)}/recipes/${encodeURIComponent(recipeId)}`, {
 		method: 'GET',
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
@@ -95,7 +95,7 @@ function displayRecipe(recipe) {
 	// Title
 	document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
 	const owner = recipe.owner_username;
-	document.getElementById('recipeOwner').innerHTML = `by <a href="/user/${owner}" class="hover:underline">@${owner}</a>`;
+	document.getElementById('recipeOwner').innerHTML = `by <a href="/user/${encodeURIComponent(owner)}" class="hover:underline">@${escapeHtml(owner)}</a>`;
 
 	// Times and servings
 	document.getElementById('prepTime').textContent = recipe.prep_time ? `${recipe.prep_time} min` : '-';
@@ -112,7 +112,7 @@ function displayRecipe(recipe) {
 			li.className = 'flex items-start py-2';
 			li.innerHTML = `
 				<span class="text-pink-dark mr-3 font-bold">•</span>
-				<span class="text-gray-700 break-words min-w-0">${ingredient}</span>
+				<span class="text-gray-700 break-words min-w-0">${escapeHtml(ingredient)}</span>
 			`;
 			ingredientsList.appendChild(li);
 		});
@@ -129,7 +129,7 @@ function displayRecipe(recipe) {
 				<span class="flex-shrink-0 w-10 h-10 bg-pink-dark text-white rounded-full flex items-center justify-center mr-4 font-bold text-lg">
 					${index + 1}
 				</span>
-				<span class="text-gray-700 pt-2 break-words min-w-0">${step}</span>
+				<span class="text-gray-700 pt-2 break-words min-w-0">${escapeHtml(step)}</span>
 			`;
 			stepsList.appendChild(li);
 		});
@@ -173,7 +173,7 @@ function displayRecipe(recipe) {
 	const from = urlParams.get('from');
 
 	if (backBtn && username) {
-		backBtn.href = `/user/${username}`;
+		backBtn.href = `/user/${encodeURIComponent(username)}`;
 		backBtn.textContent = '← Back to Profile';
 	} else if (backBtn && from === 'search') {
 		backBtn.href = '/search';

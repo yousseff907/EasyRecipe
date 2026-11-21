@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from services.video_audio_downloader import *
 from services.audio_extractor import extract_transcript
 import os
+import re
 import secrets
 from utils.validators import *
 from utils.database import *
@@ -22,6 +23,18 @@ from fastapi.templating import Jinja2Templates
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from weasyprint import HTML
+
+# Usernames end up in URLs and HTML, so only allow a safe set of characters.
+USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9_.]{3,30}$")
+
+def generate_username(db, email: str) -> str:
+	base = re.sub(r"[^A-Za-z0-9_.]", "", email.split('@')[0])[:20]
+	if len(base) < 3:
+		base = "user"
+	username = base
+	while db.query(User).filter(User.username == username).first():
+		username = base + str(secrets.randbelow(100000))
+	return username
 
 def	delete_file(path: str):
 	try:
@@ -212,10 +225,7 @@ def	verify(request: VerificationCode, db : Session = Depends(get_db)):
 			db.refresh(verification)
 			user = db.query(User).filter(User.email == request.email).first()
 			if not user:
-				username = request.email.split('@')[0]
-				while db.query(User).filter(User.username == username).first():
-					username = username + str(secrets.randbelow(99990))
-				user = User(email = request.email, username = username)
+				user = User(email = request.email, username = generate_username(db, request.email))
 				db.add(user)
 				db.commit()
 				db.refresh(user)
@@ -405,6 +415,8 @@ class Username(BaseModel):
 
 @app.post("/api/change_username")
 def change_username(request : Username, current_user : User = Depends(get_current_user), db : Session = Depends(get_db)):
+	if not USERNAME_PATTERN.fullmatch(request.string):
+		raise HTTPException(status_code=400, detail="Username must be 3-30 characters: letters, numbers, underscores and dots only")
 	unsafe_username = moderate_content(addon=request.string)
 	if unsafe_username == True:
 		raise HTTPException(status_code=400, detail=(f"Username content violates our community guidelines. "
@@ -631,10 +643,7 @@ def login_with_google(body : GoogleAuth, db : Session = Depends(get_db)):
 		email = idinfo['email']
 		user = db.query(User).filter(User.email == email).first()
 		if not user:
-			username = email.split('@')[0]
-			while db.query(User).filter(User.username == username).first():
-				username = username + str(secrets.randbelow(99990))
-			user = User(email = email, username = username)
+			user = User(email = email, username = generate_username(db, email))
 			db.add(user)
 			db.commit()
 			db.refresh(user)

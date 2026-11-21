@@ -1,4 +1,3 @@
-const API_URL = '';
 
 function requestCode() {
 	const email = document.getElementById('email').value;
@@ -92,13 +91,13 @@ function loadFeed() {
 			const container = document.getElementById('feedContainer');
 			data.recipes.forEach(recipe => {
 				const card = document.createElement('a');
-				card.href = `/r/${recipe.id}`;
+				card.href = `/r/${encodeURIComponent(recipe.id)}`;
 				card.className = 'block bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden';
 				card.innerHTML = `
 					<div class="p-6">
-						<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">${recipe.title || 'Untitled'}</h3>
-						<p class="text-xs text-pink-dark">by @${recipe.owner_username}</p>
-						<p class="text-xs text-gray-500 mt-1">${recipe.prep_time ? recipe.prep_time + ' min' : ''}</p>
+						<h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">${escapeHtml(recipe.title || 'Untitled')}</h3>
+						<p class="text-xs text-pink-dark">by @${escapeHtml(recipe.owner_username)}</p>
+						<p class="text-xs text-gray-500 mt-1">${recipe.prep_time ? escapeHtml(recipe.prep_time) + ' min' : ''}</p>
 					</div>
 					<div class="bg-pink-light px-6 py-3 text-pink-dark font-semibold text-sm">
 						View Recipe →
