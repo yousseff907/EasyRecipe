@@ -4,6 +4,16 @@ EasyRecipe turns cooking videos into written recipes. Paste a TikTok or Facebook
 
 It ran as a public website at easyrecipe.online from January to June 2026. It is no longer hosted, but you can run it yourself with one command (see [Running it locally](#running-it-locally)).
 
+![A recipe extracted from a TikTok video](docs/screenshots/recipe.jpg)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/extract.jpg" alt="Pasting a video link on the extract page"></td>
+    <td><img src="docs/screenshots/instructions.jpg" alt="Recipe steps and estimated nutrition"></td>
+    <td><img src="docs/screenshots/home.jpg" alt="Home page with saved recipes and favorites"></td>
+  </tr>
+</table>
+
 ## What it does
 
 - Extracts recipes from TikTok videos, TikTok photo slideshows and Facebook videos. You can add up to 300 characters of extra instructions, like "make it vegan". Instagram links are not supported.
