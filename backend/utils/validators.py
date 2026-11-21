@@ -46,21 +46,17 @@ BLOCKED_HOSTS = {'l.facebook.com', 'lm.facebook.com'}
 
 
 def is_valid_url(url) -> bool:
-	if not (url.startswith('http://') or url.startswith('https://')):
+	if not url.startswith(('http://', 'https://')):
 		return False
 	for char in DANGEROUS_CHARS:
 		if char in url:
 			return False
-	if len(url) > 500:
-		return False
-	return True
+	return len(url) <= 500
 
 
 def is_supported_platform(url):
 	platform = get_platform_name(url)
-	if platform == 'tiktok' or platform == 'facebook':
-		return True
-	return False
+	return platform in ('tiktok', 'facebook')
 
 
 def get_platform_name(url):

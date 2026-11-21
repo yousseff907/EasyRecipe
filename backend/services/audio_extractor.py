@@ -8,4 +8,4 @@ def extract_transcript(path: str):
 		transcript = result['text']
 		return transcript
 	except Exception as e:
-		raise RuntimeError(f"Transcription failed: {str(e)}") from e
+		raise RuntimeError(f"Transcription failed: {e}") from e

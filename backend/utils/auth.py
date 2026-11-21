@@ -1,6 +1,6 @@
-from fastapi import Header, HTTPException, Depends
+from fastapi import HTTPException, Depends
 from utils.jwt_helper import verify_jwt_token
-from utils.database import SessionLocal, get_db
+from utils.database import get_db
 from models.user import User
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 

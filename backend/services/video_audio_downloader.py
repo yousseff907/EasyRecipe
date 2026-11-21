@@ -1,5 +1,4 @@
 import subprocess
-from glob import glob
 import uuid
 import os
 import requests

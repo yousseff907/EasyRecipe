@@ -114,4 +114,4 @@ def send_email(email: str, code: str):
 		email_response = resend.Emails.send(params)
 		return email_response
 	except Exception as e:
-		raise Exception(f"Failed to send email: {str(e)}")
+		raise RuntimeError(f"Failed to send email: {e}") from e

@@ -109,9 +109,9 @@ def extract_recipe(request: VideoRequest, current_user: User = Depends(get_curre
 		url = resolve_short_link(url)
 		try:
 			caption = get_caption(url)
-		except:
+		except Exception:
 			caption = ""
-		recipe_dictionary = dict()
+		recipe_dictionary = {}
 		if '/photo/' in url:
 			slideshow_data = get_slideshow_data(url)
 			photo_paths = download_slideshow_images(slideshow_data.get("images"))
@@ -143,7 +143,7 @@ def extract_recipe(request: VideoRequest, current_user: User = Depends(get_curre
 			raise HTTPException(
 				status_code=400,
 				detail=(
-					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+					"Recipe content violates our community guidelines. Please review and remove inappropriate content"
 				),
 			)
 
@@ -254,7 +254,7 @@ async def login(body: LoginRequest, request: Request, db: Session = Depends(get_
 		db.commit()
 		db.refresh(rate_limit)
 		code = str(secrets.randbelow(1000000)).zfill(6)
-		verification = create_authentificator(db, code, body.email)
+		create_authentificator(db, code, body.email)
 		send_email(body.email, code)
 		return {"message": "Code sent"}
 	except HTTPException:
@@ -430,7 +430,7 @@ def make_your_own(
 			raise HTTPException(
 				status_code=400,
 				detail=(
-					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+					"Recipe content violates our community guidelines. Please review and remove inappropriate content"
 				),
 			)
 		recipe = Recipe(
@@ -482,7 +482,7 @@ def make_your_own_with_ai(
 			raise HTTPException(
 				status_code=400,
 				detail=(
-					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+					"Recipe content violates our community guidelines. Please review and remove inappropriate content"
 				),
 			)
 
@@ -526,8 +526,7 @@ def delete_account(request: Feedback, current_user: User = Depends(get_current_u
 			raise HTTPException(
 				status_code=400,
 				detail=(
-					f"Feedback content violates our community guidelines. "
-					f"Please review and remove inappropriate content"
+					"Feedback content violates our community guidelines. Please review and remove inappropriate content"
 				),
 			)
 
@@ -573,7 +572,7 @@ def change_username(request: Username, current_user: User = Depends(get_current_
 		raise HTTPException(
 			status_code=400,
 			detail=(
-				f"Username content violates our community guidelines. Please review and remove inappropriate content"
+				"Username content violates our community guidelines. Please review and remove inappropriate content"
 			),
 		)
 	existing = db.query(User).filter(User.username == request.string).first()
@@ -595,7 +594,7 @@ def change_bio(request: Bio, current_user: User = Depends(get_current_user), db:
 	if unsafe_bio == True:
 		raise HTTPException(
 			status_code=400,
-			detail=(f"Bio content violates our community guidelines. Please review and remove inappropriate content"),
+			detail=("Bio content violates our community guidelines. Please review and remove inappropriate content"),
 		)
 	current_user.bio = request.string
 	db.commit()
@@ -762,35 +761,30 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/r/{id}")
 def get_public_recipe(rq: Request, id: int, db: Session = Depends(get_db)):
-	try:
-		recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
-		if recipe is None:
-			raise HTTPException(status_code=404, detail="Recipe Not Found")
-		owner = db.query(User).filter(User.id == recipe.user_id).first()
-		if owner is None:
-			raise HTTPException(status_code=404, detail="Recipe Not Found")
-		nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
-		return templates.TemplateResponse(
-			name="recipe_public.html",
-			request=rq,
-			context={
-				"title": recipe.title,
-				"recipe_id": recipe.id,
-				"owner_username": owner.username,
-				"prep_time": recipe.prep_time,
-				"cook_time": recipe.cook_time,
-				"servings": recipe.servings,
-				"serving_size": recipe.serving_size,
-				"ingredients": json.loads(recipe.ingredients),
-				"steps": json.loads(recipe.steps),
-				"nutrition": nutrition,
-				"site_url": SITE_URL,
-			},
-		)
-	except HTTPException:
-		raise
-	except Exception:
-		raise
+	recipe = db.query(Recipe).filter(Recipe.id == id, Recipe.is_public == True).first()
+	if recipe is None:
+		raise HTTPException(status_code=404, detail="Recipe Not Found")
+	owner = db.query(User).filter(User.id == recipe.user_id).first()
+	if owner is None:
+		raise HTTPException(status_code=404, detail="Recipe Not Found")
+	nutrition = json.loads(recipe.nutrition) if recipe.nutrition else None
+	return templates.TemplateResponse(
+		name="recipe_public.html",
+		request=rq,
+		context={
+			"title": recipe.title,
+			"recipe_id": recipe.id,
+			"owner_username": owner.username,
+			"prep_time": recipe.prep_time,
+			"cook_time": recipe.cook_time,
+			"servings": recipe.servings,
+			"serving_size": recipe.serving_size,
+			"ingredients": json.loads(recipe.ingredients),
+			"steps": json.loads(recipe.steps),
+			"nutrition": nutrition,
+			"site_url": SITE_URL,
+		},
+	)
 
 
 class RecipeEdit(BaseModel):
@@ -817,7 +811,7 @@ def edit_recipe(
 			raise HTTPException(
 				status_code=400,
 				detail=(
-					f"Recipe content violates our community guidelines. Please review and remove inappropriate content"
+					"Recipe content violates our community guidelines. Please review and remove inappropriate content"
 				),
 			)
 		recipe.title = request.title
