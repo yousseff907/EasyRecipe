@@ -394,6 +394,7 @@ def delete_recipe(id: int, current_user: User = Depends(get_current_user), db=De
 		raise HTTPException(status_code=404, detail="Recipe not found")
 	if recipe.user_id != current_user.id:
 		raise HTTPException(status_code=403, detail="You do not have permissions")
+	db.query(UserFavorites).filter(UserFavorites.recipe_id == recipe.id).delete(synchronize_session=False)
 	db.delete(recipe)
 	db.commit()
 	return {"message": "Recipe deleted successfully"}
@@ -530,8 +531,11 @@ def delete_account(request: Feedback, current_user: User = Depends(get_current_u
 
 		if request.feedback.strip():
 			db.add(AccountFeedback(feedback=request.feedback.strip()))
+		recipe_ids = [r.id for r in db.query(Recipe.id).filter(Recipe.user_id == current_user.id)]
+		db.query(UserFavorites).filter(
+			or_(UserFavorites.user_id == current_user.id, UserFavorites.recipe_id.in_(recipe_ids))
+		).delete(synchronize_session=False)
 		db.query(Recipe).filter(Recipe.user_id == current_user.id).delete()
-		db.query(UserFavorites).filter(UserFavorites.user_id == current_user.id).delete()
 		db.delete(current_user)
 		db.commit()
 		return {"message": "Account deleted successfully"}
