@@ -57,8 +57,6 @@ dist/
 build/
 *.egg-info/
 tailwindcss-linux-x64
-frontend/input.css
-frontend/tailwind.config.js
 
 # Backup
 frontend_backup/
