@@ -2,6 +2,8 @@
 
 EasyRecipe turns cooking videos into written recipes. Paste a TikTok or Facebook link and it downloads the video, transcribes the audio with Whisper, and has Gemini write out the ingredients, steps, cooking times and an estimated nutrition breakdown per serving.
 
+It ran as a public website at easyrecipe.online from January to June 2026. It is no longer hosted, but you can run it yourself with one command (see [Running it locally](#running-it-locally)).
+
 ## What it does
 
 - Extracts recipes from TikTok videos, TikTok photo slideshows and Facebook videos. You can add up to 300 characters of extra instructions, like "make it vegan". Instagram links are not supported.
