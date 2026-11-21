@@ -5,6 +5,8 @@ import requests
 from urllib.parse import urlparse, urljoin
 from utils.validators import validate_video_url
 
+os.makedirs("data", exist_ok=True)
+
 SHORT_LINK_HOSTS = ('fb.watch',)
 
 
