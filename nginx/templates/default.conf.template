@@ -18,6 +18,8 @@ server {
 	sub_filter_types text/plain text/xml application/xml;
 	sub_filter '__SITE_DOMAIN__' '${SITE_DOMAIN}';
 	sub_filter '__CONTACT_EMAIL__' '${CONTACT_EMAIL}';
+	sub_filter '__GOOGLE_CLIENT_ID__' '${GOOGLE_CLIENT_ID}';
+	sub_filter '__TURNSTILE_SITE_KEY__' '${TURNSTILE_SITE_KEY}';
 
 	location ~ \.php$ {
 		return 302 https://www.youtube.com/watch?v=dQw4w9WgXcQ;

@@ -18,6 +18,8 @@ services:
     environment:
       - SITE_DOMAIN=${SITE_DOMAIN:?Set SITE_DOMAIN in .env}
       - CONTACT_EMAIL=${CONTACT_EMAIL:?Set CONTACT_EMAIL in .env}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID in .env}
+      - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:?Set TURNSTILE_SITE_KEY in .env}
     volumes:
       - ./frontend:/usr/share/nginx/html
       - /etc/letsencrypt:/etc/letsencrypt:ro 
