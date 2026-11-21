@@ -162,7 +162,6 @@ def extract_recipe(request: VideoRequest, current_user: User = Depends(get_curre
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
-		print(recipe_dictionary)
 		return {"status": "success", "recipe": recipe_dictionary, "recipe_id": recipe.id}
 
 	except HTTPException:
@@ -501,7 +500,6 @@ def make_your_own_with_ai(
 		db.add(recipe)
 		db.commit()
 		db.refresh(recipe)
-		print(recipe_dictionary)
 		return {"status": "success", "recipe": recipe_dictionary, "recipe_id": recipe.id}
 
 	except HTTPException:

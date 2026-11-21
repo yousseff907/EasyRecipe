@@ -28,9 +28,6 @@ data/image_*
 *.wav
 *.mp3
 
-# Keep data directory structure
-!data/.gitkeep
-
 # IDEs
 .vscode/
 .idea/

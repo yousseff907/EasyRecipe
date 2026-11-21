@@ -23,36 +23,6 @@ def resolve_short_link(url, max_hops=3):
 	raise ValueError("Too many redirects. Please paste the full video link.")
 
 
-def download_audio(url):
-	try:
-		file_id = str(uuid.uuid4())
-		audio_path = f"data/audio_{file_id}.m4a"
-		subprocess.run(
-			[
-				"yt-dlp",
-				"--ies",
-				"default,-generic",
-				"-x",
-				"--audio-format",
-				"m4a",
-				"--no-playlist",
-				"--restrict-filenames",
-				"-o",
-				audio_path,
-				url,
-			],
-			check=True,
-		)
-
-		if not os.path.exists(audio_path):
-			raise RuntimeError("audio_path file not found after download")
-
-		return audio_path
-
-	except subprocess.CalledProcessError as e:
-		raise RuntimeError("Audio download failed") from e
-
-
 def download_video(url):
 	try:
 		file_id = str(uuid.uuid4())

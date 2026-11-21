@@ -13,4 +13,3 @@ class User(Base):
 	created_at = Column(DateTime, default=datetime.now)
 	bio = Column(String, nullable=False, default="")
 	recipes = relationship("Recipe", back_populates="owner")
-	favorites = relationship("Recipe", secondary="user_favorites", lazy="dynamic")
