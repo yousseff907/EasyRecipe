@@ -3,3 +3,9 @@ line-length = 120
 [format]
 indent-style = "tab"
 quote-style = "preserve"
+
+[lint]
+ignore = ["B008", "BLE001", "I001"]
+
+[lint.per-file-ignores]
+"backend/utils/database.py" = ["F401"]
